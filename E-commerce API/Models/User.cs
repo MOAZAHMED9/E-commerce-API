@@ -33,5 +33,8 @@ namespace E_commerce_API.Models
 
         public ICollection<Review> Reviews { get; set; }
 
+        public string? RefreshTokenHash { get;  set; }
+        public DateTime? RefreshTokenExpiresAt { get;  set; }
+        public DateTime? RefreshTokenRevokedAt { get;  set; }
     }
 }
