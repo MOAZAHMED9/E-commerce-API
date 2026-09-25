@@ -14,6 +14,8 @@ namespace E_commerce_API.Data.config
                 .HasForeignKey(x => x.UserId);
 
             builder.Property(x=> x.totalPrice).HasPrecision(18,2);
+            builder.HasQueryFilter(x => !x.IsDeleted);
+
         }
     }
 }

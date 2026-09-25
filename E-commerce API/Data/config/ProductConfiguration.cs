@@ -18,6 +18,9 @@ namespace E_commerce_API.Data.config
             builder.HasIndex(x => x.Price);
             builder.HasIndex(x => x.IsAvailable);
 
+            builder.HasQueryFilter(x => !x.IsDeleted);
+
+
 
         }
     }

@@ -11,7 +11,9 @@ namespace E_commerce_API.Data.config
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Name).HasMaxLength(20);
             builder.Property(x=> x.Description).HasMaxLength(100);
-            
+
+            builder.HasQueryFilter(x => !x.IsDeleted);
+
         }
     }
 }

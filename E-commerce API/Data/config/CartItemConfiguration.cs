@@ -13,6 +13,7 @@ namespace E_commerce_API.Data.config
                 .WithMany(x=> x.CartItems)
                 .HasForeignKey(x=>x.ShoppingCartId);
 
+            builder.HasQueryFilter(x => !x.IsDeleted );
         }
     }
 }

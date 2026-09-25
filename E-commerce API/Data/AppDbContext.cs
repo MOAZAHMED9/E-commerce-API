@@ -29,7 +29,7 @@ namespace E_commerce_API.Data
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);    //ا EF Core، دور في الـ Assembly بتاع المشروع على كل الـ Classes اللي بتعمل IEntityTypeConfiguration<T>، وطبّق الـ configurations بتاعتها تلقائيًا.
 
-
+            SeedData.Seed(modelBuilder);
         }
 
 
@@ -55,7 +55,7 @@ namespace E_commerce_API.Data
                     entry.Entity.UpdateBy = _currentUserService.UserName;
                     entry.Entity.UpdateAt = DateTime.UtcNow;
 
-                    entry.Property(x => x.CreateAt)                      //اي لازمتها 
+                    entry.Property(x => x.CreateAt)                     
                        .IsModified = false;
 
                     entry.Property(x => x.CreateBy)
