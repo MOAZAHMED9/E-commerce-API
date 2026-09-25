@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Training_Center_Management_API.Dtos.Auth;
+using E_commerce_API.DTOs.Auth;
 
 namespace E_commerce_API.Controllers
 {
@@ -48,8 +48,6 @@ namespace E_commerce_API.Controllers
                 Phone = register.phone,
                 Role = enRole.Coustomer,
                 IsActive = true,
-                CreateBy = "System",
-                CreateAt = DateTime.UtcNow
 
             };
 
@@ -88,7 +86,7 @@ namespace E_commerce_API.Controllers
             }
 
             var AccessToken = _jwtService.GenrateToken(user);
-            var refreshtoken = _jwtService.GenerateRefreshToken(user);
+            var refreshtoken = await _jwtService.GenerateRefreshToken(user);
 
             return Ok(new
             {
@@ -104,9 +102,9 @@ namespace E_commerce_API.Controllers
         [Authorize]
         public async Task<IActionResult> Logout([FromQuery] RefreshDto dto)
         {
+         
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == dto.Email);
 
-            var user = await _context.Users.FirstOrDefaultAsync(x=> x.Email==dto.Email);
-  
 
             if (user == null)
             {
@@ -121,6 +119,23 @@ namespace E_commerce_API.Controllers
             return Ok("Logged out successfully.");
 
         }
+
+
+
+
+
+
+        [HttpPost("Logt")]
+        //[Authorize]
+        public async Task<IActionResult> test( int id)
+        {
+
+            var category = await _context.Categore
+               .Include(x => x.Products)
+               .FirstOrDefaultAsync(x => x.Id == id);
+            return Ok(category);
+        }
+
 
 
 
