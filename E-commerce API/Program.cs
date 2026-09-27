@@ -1,6 +1,8 @@
 ﻿using E_commerce_API.Data;
 using E_commerce_API.Services.Audit;
 using E_commerce_API.Services.Category;
+using E_commerce_API.Services.Product;
+using E_commerce_API.Services.ShoppingCart;
 using E_commerce_API.Services.TokenService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +32,8 @@ builder.Services.AddDbContext<AppDbContext>(option =>
 builder.Services.AddScoped<IJwtService,JwtService>();
 builder.Services.AddScoped<ICurrentUserService,CurrentUserService>();
 builder.Services.AddScoped<ICategoryService,CategorySesvice>();
+builder.Services.AddScoped<IProductService,ProductService>();
+builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 
 
 

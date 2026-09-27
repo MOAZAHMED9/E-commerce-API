@@ -1,6 +1,9 @@
 ﻿using E_commerce_API.Data;
+using E_commerce_API.DTOs.Common;
 using E_commerce_API.DTOs.Product;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace E_commerce_API.Services.Product
 {
@@ -17,6 +20,7 @@ namespace E_commerce_API.Services.Product
         public async Task<List<ProductDto>> GetAllProduct()
         {
             return await _context.Products
+                 .AsNoTracking()
                  .Select(x => new ProductDto
                  {
                      Id = x.Id,
@@ -44,6 +48,7 @@ namespace E_commerce_API.Services.Product
 
 
             var product = await _context.Products
+                .AsNoTracking()
                   .Select(x => new ProductDto
                   {
                       Id = x.Id,
@@ -164,6 +169,110 @@ namespace E_commerce_API.Services.Product
 
         }
 
+        public async Task<PagedResultDto<ProductDto>> Search([FromQuery] ProductSearchQuereDto searchQuere)
+        {
+            var quere = _context.Products.AsQueryable();
 
+            if(!string.IsNullOrEmpty(searchQuere.Search))
+            {
+                quere = quere
+                    .Where(s=> s.Name .Contains(searchQuere.Search));
+            }
+
+            if(searchQuere.isAvailable)
+            {
+                quere = quere.Where(s => s.IsAvailable);
+            }
+
+            if(searchQuere.maxprice!=null)
+            {
+                quere = quere.Where(x => x.Price <= searchQuere.maxprice);
+            }
+
+            if(searchQuere.minprice!=null)
+            {
+                quere = quere.Where(x => x.Price >= searchQuere.maxprice);
+            }
+
+            if(searchQuere.id!=null)
+            {
+                quere = quere.Where(x=> x.Id == searchQuere.id);
+            }
+
+
+
+            if(!string.IsNullOrEmpty(searchQuere.orderby))
+            {
+                switch (searchQuere.orderby.ToLower())
+                {
+                    case "name":
+                        quere = searchQuere.desc? 
+                            quere.OrderByDescending(x => x.Name) 
+                            : quere.OrderBy(x => x.Name);
+                        break;
+
+
+
+                    case "price":
+
+                        quere = searchQuere.desc?
+                             quere.OrderByDescending(s => s.Price)
+                            : quere.OrderBy(s => s.Price);
+
+                        break;
+
+                    case "quantity":
+            
+                        quere = searchQuere.desc?
+                             quere.OrderByDescending(s => s.Stock)
+                            : quere.OrderBy(s => s.Stock);
+                        break;
+
+
+                    //default:
+
+                    //    quere = quere.OrderBy(s => s.Id);
+
+                    //    break;
+                }
+            }
+            else
+            {
+                quere = quere.OrderBy(s => s.Id);
+            }
+
+            var totalcount = quere.Count();
+
+            var pagenumber = searchQuere.pagenumber <1? 1 : searchQuere.pagenumber;
+
+            var totalpage = (int)Math.Ceiling((double)totalcount/searchQuere.pagesize);
+
+            var data= await quere
+                .Select(s => new ProductDto
+                {
+                    Id = s.Id,
+                    Name = s.Name,
+                    price= s.Price,
+                    Description = s.Description,
+                    quantity= s.Stock,
+                    isActive= s.IsAvailable,
+                    Categoryname = s.Categore.Name
+
+                })
+                .Skip(pagenumber - 1 * searchQuere.pagesize)
+                .Take(searchQuere.pagesize)
+                .ToListAsync();
+
+            return new PagedResultDto<ProductDto>
+            {
+                pageNumber = pagenumber,
+                PageSize = searchQuere.pagesize,
+                TotalCount = totalcount,
+                TotalPages = totalpage,
+                Data = data
+            };
+        }
+
+    
     }
 }

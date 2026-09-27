@@ -41,10 +41,6 @@ namespace E_commerce_API.Data
         }
 
 
-
-
-
-
         private void ApplyAuditing()
         {
             var statuts = ChangeTracker.Entries<BaseEntity>().ToList();

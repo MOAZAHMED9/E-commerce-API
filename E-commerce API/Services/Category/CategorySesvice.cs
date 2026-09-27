@@ -18,6 +18,7 @@ namespace E_commerce_API.Services.Category
         public async Task<List<CategoryDto>> GetAllCategories()
         {
             var categorias = await _context.Categore
+                .AsNoTracking()
                 .Select(s=> new CategoryDto
                 {
                     Id=s.Id,
@@ -39,7 +40,9 @@ namespace E_commerce_API.Services.Category
                 return null;
             }
             
-            var caregory = await _context.Categore.FirstOrDefaultAsync(x=> x.Id == id);
+            var caregory = await _context.Categore
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x=> x.Id == id);
 
             return new CategoryDto
             {

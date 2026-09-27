@@ -13,7 +13,7 @@ namespace E_commerce_API.Data.config
             builder
                 .HasOne(x => x.Categore)
                 .WithMany(x => x.Products)
-                .HasForeignKey(x=> x.CategoreId);
+                .HasForeignKey(x => x.CategoreId);
 
             builder.HasIndex(x => x.Price);
             builder.HasIndex(x => x.IsAvailable);

@@ -48,6 +48,7 @@ namespace E_commerce_API.Controllers
                 Phone = register.phone,
                 Role = enRole.Coustomer,
                 IsActive = true,
+                ShoppingCart = new ShoppingCart()
 
             };
 
@@ -131,7 +132,8 @@ namespace E_commerce_API.Controllers
         {
 
             var category = await _context.Categore
-               .Include(x => x.Products)
+               //.Include(x => x.Products)
+               .Select(x=> new {x.Name,x.Products,x.Id})
                .FirstOrDefaultAsync(x => x.Id == id);
             return Ok(category);
         }
