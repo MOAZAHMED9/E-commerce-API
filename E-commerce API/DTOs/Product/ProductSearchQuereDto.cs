@@ -1,4 +1,5 @@
 ﻿using E_commerce_API.Models;
+using System.ComponentModel.DataAnnotations;
 using System.Numerics;
 
 namespace E_commerce_API.DTOs.Product
@@ -14,8 +15,10 @@ namespace E_commerce_API.DTOs.Product
         public bool desc {  get; set; } = false;
         public bool isAvailable { get; set; } = true;
 
-        public int pagenumber { get; set; }
-        public int pagesize { get; set; }
+        [Range(1, int.MaxValue)]
+        public int pagenumber { get; set; } = 1;
+        [Range(1, 50)]
+        public int pagesize { get; set; } = 10;
 
     }
 }

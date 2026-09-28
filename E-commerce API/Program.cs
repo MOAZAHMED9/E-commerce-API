@@ -39,6 +39,11 @@ builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 
 
 
+
+
+
+
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme

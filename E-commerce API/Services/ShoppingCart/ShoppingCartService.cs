@@ -208,7 +208,7 @@ namespace E_commerce_API.Services.ShoppingCart
                 return true;
             }
 
-            _context.CartItems.RemoveRange(result);
+            _context.CartItems.RemoveRange(result);           // hard deleted
             await _context.SaveChangesAsync();
 
             return true;

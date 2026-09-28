@@ -16,6 +16,7 @@ namespace E_commerce_API.DTOs.Product
         public int quantity { get; set; }
         [Required]
         public bool isActive { get; set; } = true;
+        [Required]
         public int CategoryId { get; set; }
 
     }

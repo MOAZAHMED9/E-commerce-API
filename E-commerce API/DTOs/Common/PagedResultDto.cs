@@ -3,7 +3,7 @@
     public class PagedResultDto<T>
     {
         public int pageNumber { get; set; }
-        public int PageSize { get; set; }
+        public int PageSize { get; set; } = 1;
 
         public int TotalCount { get; set; }
 

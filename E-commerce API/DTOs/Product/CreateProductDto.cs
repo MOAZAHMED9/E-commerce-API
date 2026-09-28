@@ -17,6 +17,7 @@ namespace E_commerce_API.DTOs.Product
         [Required]
         public bool isActive { get; set; } = true;
         [Range (1, int.MaxValue)]
+        [Required]
         public int CategoryId { get; set; }
 
     }

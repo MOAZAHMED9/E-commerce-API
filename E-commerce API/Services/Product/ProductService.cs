@@ -229,11 +229,6 @@ namespace E_commerce_API.Services.Product
                         break;
 
 
-                    //default:
-
-                    //    quere = quere.OrderBy(s => s.Id);
-
-                    //    break;
                 }
             }
             else
@@ -248,6 +243,8 @@ namespace E_commerce_API.Services.Product
             var totalpage = (int)Math.Ceiling((double)totalcount/searchQuere.pagesize);
 
             var data= await quere
+                .Skip((pagenumber - 1) * searchQuere.pagesize)
+                .Take(searchQuere.pagesize)
                 .Select(s => new ProductDto
                 {
                     Id = s.Id,
@@ -259,8 +256,6 @@ namespace E_commerce_API.Services.Product
                     Categoryname = s.Categore.Name
 
                 })
-                .Skip(pagenumber - 1 * searchQuere.pagesize)
-                .Take(searchQuere.pagesize)
                 .ToListAsync();
 
             return new PagedResultDto<ProductDto>

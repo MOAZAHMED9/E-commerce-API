@@ -44,6 +44,11 @@ namespace E_commerce_API.Services.Category
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x=> x.Id == id);
 
+            if(caregory==null)
+            {
+                return null;
+            }
+
             return new CategoryDto
             {
                 Id = caregory.Id,
