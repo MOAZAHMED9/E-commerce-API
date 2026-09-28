@@ -23,7 +23,7 @@ namespace E_commerce_API.Controllers
 
 
 
-        [HttpGet]
+        [HttpGet("GetAllProduct")]
         public async Task<ActionResult<IEnumerable<ProductDto>>> GetallProduct()
         {
             var result = await _productService.GetAllProduct();

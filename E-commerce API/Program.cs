@@ -1,10 +1,12 @@
 ﻿using E_commerce_API.Data;
+using E_commerce_API.Middleware;
 using E_commerce_API.Services.Audit;
 using E_commerce_API.Services.Category;
 using E_commerce_API.Services.Product;
 using E_commerce_API.Services.ShoppingCart;
 using E_commerce_API.Services.TokenService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -39,6 +41,21 @@ builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 
 
 
+
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("AuthPolicy", limiterOptions =>
+    {
+        limiterOptions.PermitLimit = 5;
+
+        limiterOptions.Window = TimeSpan.FromMinutes(1);
+
+        limiterOptions.QueueLimit = 0;                 //متخزنش طلب
+    });
+
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+});                    //   بولسي ال ليمت 
 
 
 
@@ -119,10 +136,14 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseRateLimiter();
 app.UseAuthentication();
+app.UseMiddleware<SecurityLoggingMiddleware>();
 
 app.UseAuthorization();
 
 app.MapControllers();
 
 app.Run();
+/// عايزين نشوف الترتيب 

@@ -48,7 +48,7 @@ namespace E_commerce_API.Controllers
 
         [Authorize(Roles ="Admin")]
         [HttpPost("CreateCategory")]
-        public async Task<ActionResult<CategoryDto>> CreateCategory(CreateCategoryDto dto)
+        public async Task<ActionResult<CategoryDto>> CreateCategory([FromQuery]CreateCategoryDto dto)
         {
             var result = await _categoryService.CreateCategory(dto);
             if (result == null)
