@@ -3,6 +3,7 @@ using E_commerce_API.DTOs.ShoppingCart;
 using E_commerce_API.Models;
 using E_commerce_API.Services.Audit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace E_commerce_API.Services.ShoppingCart
 {
@@ -208,10 +209,107 @@ namespace E_commerce_API.Services.ShoppingCart
                 return true;
             }
 
-            _context.CartItems.RemoveRange(result);           // hard deleted
+             _context.CartItems.RemoveRange(result);           // hard deleted
             await _context.SaveChangesAsync();
 
             return true;
         }
+
+
+
+        public async Task<Order> CheckoutAsync(string address)
+        {
+
+            using var transaction = await _context.Database.BeginTransactionAsync(); // لو حصل اي error في اي حاجه بعد ما عملت ال checkout  و قبل ما اعمل save changes  هيعمل rollback و يرجع كل حاجه زي ما كانت قبل ال checkout
+
+            try 
+            {
+                var userid = _currentUserService.UserId.Value;
+
+
+                var shopcart = await _context.ShoppingCarts
+                   .Where(x => x.UserId == userid)
+
+                   .FirstOrDefaultAsync();
+
+                var result = await _context.CartItems
+                     .Where(x => x.ShoppingCartId == shopcart.Id)
+                     .Include(x => x.Product)                     //لو جبت الكارت ايتيم من غيرها . النفجيشن مش هيكون محمل الداتا بتاعتها 
+                     .ToListAsync();
+
+
+
+                if (result.IsNullOrEmpty())
+                {
+                    return null;
+                }
+
+                // حلينا مشكله ال N+1 query problem  لما جبت الكارت ايتيم من غير ال include  و بعدين كل كارت ايتيم عملت عليه access لل product  كل واحد فيهم عمل query لوحده و ده هيزود ال queries علي الداتا بيز  و هيبطئ الاداء
+                foreach (var item in result)
+                {
+                    if (!item.Product.IsAvailable)
+                    {
+                        return null;
+                    }
+
+                    if (item.quantity > item.Product.Stock)
+                    {
+                        return null;
+                    }
+                }
+
+
+
+
+
+                var totalprice = 0m;
+                foreach (var item in result)
+                {
+                    totalprice += item.Product.Price * item.quantity;
+                }
+
+
+                var order = new Order
+                {
+                    totalPrice = totalprice,
+                    stutes = enStutes.Pending,
+                    shippingAddress = address,
+                    UserId = userid
+
+                };
+                await _context.Order.AddAsync(order);
+
+                foreach (var item in result)
+                {
+                    var orderitem = new OrderItem
+                    {
+                        Quantity = item.quantity,
+                        priceAtPurchase = item.Product.Price,
+                        ProductId = item.ProductId,
+                        Order = order,                                 ////// 
+
+                    };
+                    await _context.OrderItems.AddAsync(orderitem);
+                };
+
+                foreach (var item in result)
+                {
+                    item.Product.Stock -= item.quantity;
+                }
+
+                _context.CartItems.RemoveRange(result);           // hard deleted
+
+                await _context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+                return order;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                return null;
+            }
+        }    
+
     }
 }

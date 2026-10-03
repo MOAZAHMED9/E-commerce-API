@@ -78,5 +78,16 @@ namespace E_commerce_API.Controllers
             return NoContent();
         }
 
+        [HttpPost("Chickout")]
+        public async Task<IActionResult> Checkout(string Address)
+        {
+            var result = await _shoppingCartService.CheckoutAsync(Address);
+            if (result==null)
+            {
+                return BadRequest("Checkout failed.");
+            }
+            return Ok(result);
+        }
+
     }
 }

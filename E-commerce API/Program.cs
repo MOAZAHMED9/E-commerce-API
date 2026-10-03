@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Training_Center_Management_API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
