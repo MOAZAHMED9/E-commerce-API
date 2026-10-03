@@ -3,6 +3,7 @@ using E_commerce_API.Data;
 using E_commerce_API.Middleware;
 using E_commerce_API.Services.Audit;
 using E_commerce_API.Services.Category;
+using E_commerce_API.Services.Dashboard;
 using E_commerce_API.Services.Order;
 using E_commerce_API.Services.Product;
 using E_commerce_API.Services.Review;
@@ -46,6 +47,7 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthorizationHandler, CustomerOwnerOrAdminHandler>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 
 
