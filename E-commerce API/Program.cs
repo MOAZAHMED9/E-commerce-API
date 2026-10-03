@@ -7,6 +7,7 @@ using E_commerce_API.Services.Product;
 using E_commerce_API.Services.Review;
 using E_commerce_API.Services.ShoppingCart;
 using E_commerce_API.Services.TokenService;
+using E_commerce_API.Services.User;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -41,6 +42,7 @@ builder.Services.AddScoped<IProductService,ProductService>();
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 
 

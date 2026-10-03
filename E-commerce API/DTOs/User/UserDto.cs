@@ -1,0 +1,20 @@
+﻿using E_commerce_API.Models;
+using System.ComponentModel.DataAnnotations;
+
+namespace E_commerce_API.DTOs.User
+{
+    public class UserDto
+    {
+        public int Id { get; set; }
+        public string UserName { get; set; }
+
+        public string Email { get; set; }
+
+        
+        public string Phone { get; set; }
+
+
+        public bool IsActive { get; set; }
+
+    }
+}
