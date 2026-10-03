@@ -1,4 +1,5 @@
-﻿using E_commerce_API.DTOs.ShoppingCart;
+﻿using E_commerce_API.DTOs.Order;
+using E_commerce_API.DTOs.ShoppingCart;
 using E_commerce_API.Models;
 
 namespace E_commerce_API.Services.ShoppingCart
@@ -12,6 +13,6 @@ namespace E_commerce_API.Services.ShoppingCart
 
         Task<bool> ClearCart();
 
-        Task<Order> CheckoutAsync( string Address);
+        Task<OrderDto> CheckoutAsync( string Address);
     }
 }

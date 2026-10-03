@@ -2,6 +2,7 @@
 using E_commerce_API.Middleware;
 using E_commerce_API.Services.Audit;
 using E_commerce_API.Services.Category;
+using E_commerce_API.Services.Order;
 using E_commerce_API.Services.Product;
 using E_commerce_API.Services.ShoppingCart;
 using E_commerce_API.Services.TokenService;
@@ -37,6 +38,8 @@ builder.Services.AddScoped<ICurrentUserService,CurrentUserService>();
 builder.Services.AddScoped<ICategoryService,CategorySesvice>();
 builder.Services.AddScoped<IProductService,ProductService>();
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+
 
 
 

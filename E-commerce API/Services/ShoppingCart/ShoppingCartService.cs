@@ -1,9 +1,11 @@
 ﻿using E_commerce_API.Data;
 using E_commerce_API.DTOs.ShoppingCart;
+using E_commerce_API.DTOs.Order;
 using E_commerce_API.Models;
 using E_commerce_API.Services.Audit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using OrderItem = E_commerce_API.Models.OrderItem;
 
 namespace E_commerce_API.Services.ShoppingCart
 {
@@ -217,7 +219,7 @@ namespace E_commerce_API.Services.ShoppingCart
 
 
 
-        public async Task<Order> CheckoutAsync(string address)
+        public async Task<OrderDto> CheckoutAsync(string address)
         {
 
             using var transaction = await _context.Database.BeginTransactionAsync(); // لو حصل اي error في اي حاجه بعد ما عملت ال checkout  و قبل ما اعمل save changes  هيعمل rollback و يرجع كل حاجه زي ما كانت قبل ال checkout
@@ -269,7 +271,7 @@ namespace E_commerce_API.Services.ShoppingCart
                 }
 
 
-                var order = new Order
+                var order = new Models.Order
                 {
                     totalPrice = totalprice,
                     stutes = enStutes.Pending,
@@ -302,7 +304,7 @@ namespace E_commerce_API.Services.ShoppingCart
                 await _context.SaveChangesAsync();
 
                 await transaction.CommitAsync();
-                return order;
+                return new OrderDto {Id =order.Id,Address= order.shippingAddress, userId= order.UserId, totalPrice = order.totalPrice, stutes= order.stutes };
             }
             catch
             {
