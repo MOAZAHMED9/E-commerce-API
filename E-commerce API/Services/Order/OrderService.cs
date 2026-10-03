@@ -89,7 +89,7 @@ namespace E_commerce_API.Services.Order
                     .ToList(),
 
                     Reviews = o.Reviews
-                    .Select(r => new Review
+                    .Select(r => new DTOs.Order.Review
                     {
                         rate = r.rate,
                         comment = r.comment
@@ -100,6 +100,8 @@ namespace E_commerce_API.Services.Order
             return result;
 
         }
+
+
 
         public async Task<bool> UpdateStatus(int OrderId)
         {

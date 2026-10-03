@@ -26,7 +26,7 @@ namespace E_commerce_API.Data.config
                 .HasForeignKey(x => x.OrderId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            builder.HasIndex(x => new { x.UserId, x.ProductId }).IsUnique();
+            builder.HasIndex(x => new { x.UserId, x.ProductId , x.OrderId}).IsUnique();
 
             builder.Property(x => x.rate);
 

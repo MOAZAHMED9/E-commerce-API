@@ -4,6 +4,7 @@ using E_commerce_API.Services.Audit;
 using E_commerce_API.Services.Category;
 using E_commerce_API.Services.Order;
 using E_commerce_API.Services.Product;
+using E_commerce_API.Services.Review;
 using E_commerce_API.Services.ShoppingCart;
 using E_commerce_API.Services.TokenService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -39,6 +40,7 @@ builder.Services.AddScoped<ICategoryService,CategorySesvice>();
 builder.Services.AddScoped<IProductService,ProductService>();
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
 
 
 
