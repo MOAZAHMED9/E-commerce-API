@@ -23,11 +23,11 @@ namespace E_commerce_API.Services.Review
             var result = await _context.Reviews
                 .Select(r => new ReviewDto
                 {
-                    OrderId = r.Id,
-                    ProductId = r.ProductId,
-                    UserId = r.UserId,
-                    rate = r.rate,
-                    comment = r.comment
+                    Id = r.Id,
+                    Rate = r.rate,
+                    Comment = r.comment,
+                    UserName = r.User.UserName,
+                    CreatedAt = r.CreateAt,
                 })
                 .ToListAsync();
 
@@ -40,11 +40,11 @@ namespace E_commerce_API.Services.Review
                 .Where(r => r.ProductId == productId)
                 .Select(r => new ReviewDto
                 {
-                    OrderId = r.Id,
-                    ProductId = r.ProductId,
-                    UserId = r.UserId,
-                    rate = r.rate,
-                    comment = r.comment
+                    Id = r.Id,
+                    Rate = r.rate,
+                    Comment = r.comment,
+                    UserName = r.User.UserName,
+                    CreatedAt = r.CreateAt,
                 })
                 .ToListAsync();
 
@@ -59,11 +59,11 @@ namespace E_commerce_API.Services.Review
                 .Where(r => r.Id == reviewId)
                 .Select(r => new ReviewDto
                 {
-                    OrderId = r.Id,
-                    ProductId = r.ProductId,
-                    UserId = r.UserId,
-                    rate = r.rate,
-                    comment = r.comment
+                    Id = r.Id,
+                    Rate = r.rate,
+                    Comment = r.comment,
+                    UserName = r.User.UserName,
+                    CreatedAt = r.CreateAt,
                 })
                 .FirstOrDefaultAsync();
             return result;
@@ -127,6 +127,18 @@ namespace E_commerce_API.Services.Review
 
             review.rate = reviewDto.rate;
             review.comment = reviewDto.comment;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> DeleteReview(int reviewId)
+        {
+            var review = await _context.Reviews.FindAsync(reviewId);
+            if (review == null)
+            {
+                return false;
+            }
+            _context.Reviews.Remove(review);
             await _context.SaveChangesAsync();
             return true;
         }

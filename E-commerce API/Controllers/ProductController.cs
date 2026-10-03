@@ -1,7 +1,9 @@
 ﻿using E_commerce_API.DTOs.Category;
 using E_commerce_API.DTOs.Common;
 using E_commerce_API.DTOs.Product;
+using E_commerce_API.DTOs.Review;
 using E_commerce_API.Services.Product;
+using E_commerce_API.Services.Review;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,10 +17,12 @@ namespace E_commerce_API.Controllers
     {
 
         private readonly IProductService _productService;
+        private readonly IReviewService _reviewService;
 
-        public ProductController(IProductService productService)
+        public ProductController(IProductService productService, IReviewService reviewService)
         {
             _productService = productService;
+            _reviewService = reviewService;
         }
 
 
@@ -122,6 +126,17 @@ namespace E_commerce_API.Controllers
             }
             return Ok(result);
         }
+
+
+
+        [HttpGet("{productId}/reviews")]
+        public async Task<ActionResult<List<ReviewDto>>> GetReviewsByProductId(int productId)
+        {
+            var reviews = await _reviewService.GetReviewsByProductId(productId);
+            return Ok(reviews);
+        }
+
+
 
     }
 }

@@ -5,9 +5,9 @@ namespace E_commerce_API.Services.TokenService
     public interface IJwtService
     {
 
-        string GenrateToken(User user);
+        string GenrateToken(Models.User user);
 
-        Task<string> GenerateRefreshToken(User user);
-
+        Task<string> GenerateRefreshToken(Models.User user);
+        
     }
 }

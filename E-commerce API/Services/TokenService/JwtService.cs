@@ -21,7 +21,7 @@ namespace E_commerce_API.Services.TokenService
             _context = context;
         }
 
-        public string GenrateToken(User user )
+        public string GenrateToken(Models.User user )
         {
             var jwtSettings = _configuration.GetSection("Jwt");
 
@@ -52,7 +52,7 @@ namespace E_commerce_API.Services.TokenService
         }
 
 
-        public async Task<string> GenerateRefreshToken(User user)
+        public async Task<string> GenerateRefreshToken(Models.User user)
         {
             var bytes = new byte[64];
             using var rng = RandomNumberGenerator.Create();

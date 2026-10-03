@@ -128,17 +128,17 @@ namespace E_commerce_API.Controllers
 
 
 
-        [HttpPost("Logt")]
-        //[Authorize]
-        public async Task<IActionResult> test( int id)
-        {
+        //[HttpPost("Logt")]
+        ////[Authorize]
+        //public async Task<IActionResult> test( int id)
+        //{
 
-            var category = await _context.Categore
-               //.Include(x => x.Products)
-               .Select(x=> new {x.Name,x.Products,x.Id})
-               .FirstOrDefaultAsync(x => x.Id == id);
-            return Ok(category);
-        }
+        //    var category = await _context.Categore
+        //       //.Include(x => x.Products)
+        //       .Select(x=> new {x.Name,x.Products,x.Id})
+        //       .FirstOrDefaultAsync(x => x.Id == id);
+        //    return Ok(category);
+        //}
 
 
 

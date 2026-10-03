@@ -1,4 +1,5 @@
-﻿using E_commerce_API.Data;
+﻿using E_commerce_API.Auth;
+using E_commerce_API.Data;
 using E_commerce_API.Middleware;
 using E_commerce_API.Services.Audit;
 using E_commerce_API.Services.Category;
@@ -9,6 +10,7 @@ using E_commerce_API.Services.ShoppingCart;
 using E_commerce_API.Services.TokenService;
 using E_commerce_API.Services.User;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,10 +45,19 @@ builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthorizationHandler, CustomerOwnerOrAdminHandler>();
 
 
 
+builder.Services.AddAuthorization(options =>                       // تجهيو الpolice
+{
+    options.AddPolicy("CustomerOwner", policy =>
+    {
+        policy.RequireAuthenticatedUser();
 
+        policy.AddRequirements(new CustomerOwnerOrAdminRequirement());
+    });
+});
 
 
 

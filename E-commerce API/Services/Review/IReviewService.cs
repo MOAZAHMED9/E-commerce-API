@@ -9,5 +9,6 @@ namespace E_commerce_API.Services.Review
         Task<ReviewDto> GetReviewById(int reviewId);
         Task<ReviewDto> CreateReview(CreateReview reviewDto);
         Task<bool> UpdateReview(int reviewId, UpdateReviewDto reviewDto);
+        Task<bool> DeleteReview(int reviewId);
     }
 }

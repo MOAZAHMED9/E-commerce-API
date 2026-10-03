@@ -145,7 +145,7 @@ namespace E_commerce_API.Services.Order
             var order = await _context.Order
                 .Include(x=> x.OrderItems)
                 .ThenInclude(oi => oi.Product)
-                .FirstOrDefaultAsync(o => o.Id == OrderId);
+                .FirstOrDefaultAsync(o => o.Id == OrderId && o.UserId == _currentUserService.UserId);
             if (order == null)
             {
                 return false;
