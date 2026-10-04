@@ -25,9 +25,11 @@ namespace E_commerce_API.Services.TokenService
         {
             var jwtSettings = _configuration.GetSection("Jwt");
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]!));
+            var jwtKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY_Ecommerce");
 
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!));
+
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new List<Claim>
             {

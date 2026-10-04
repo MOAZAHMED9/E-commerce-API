@@ -118,8 +118,8 @@ builder.Services.AddHttpContextAccessor();
 // علشان نشغل ال authourization
 var jwtSettings = builder.Configuration.GetSection("Jwt");             // بيجيب قسم Jwt من الإعداداتjson          
 
-var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);    //بيحوّل المفتاح من نص إلى bytes، وبعدها ينشئ منه مفتاح يستخدم لتوقيع التوكن.
-
+//var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);    //بيحوّل المفتاح من نص إلى bytes، وبعدها ينشئ منه مفتاح يستخدم لتوقيع التوكن.
+var jwtKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY_Ecommerce");
 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)     //التاكد من اعداتات ال jwt
@@ -136,7 +136,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)     /
                 ValidIssuer = jwtSettings["Issuer"],
                 ValidAudience = jwtSettings["Audience"],
 
-                IssuerSigningKey = new SymmetricSecurityKey(key),
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!)),
 
                 ClockSkew = TimeSpan.Zero
             };
