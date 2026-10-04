@@ -7,14 +7,16 @@ namespace E_commerce_API.Services.Category
     public class CategorySesvice : ICategoryService
     {
         private readonly AppDbContext _context;
+        private readonly ILogger<CategorySesvice> _logger;
 
-        public CategorySesvice(AppDbContext context)
+        public CategorySesvice(AppDbContext context, ILogger<CategorySesvice> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
 
-      
+
         public async Task<List<CategoryDto>> GetAllCategories()
         {
             var categorias = await _context.Categore
@@ -79,6 +81,7 @@ namespace E_commerce_API.Services.Category
 
             await _context.Categore.AddAsync(category);
             await _context.SaveChangesAsync();
+            _logger.LogInformation($"Category created with ID: {category.Id} ");
 
             return await GetCategoryById(category.Id);
 
@@ -102,6 +105,7 @@ namespace E_commerce_API.Services.Category
             category.Description = dto.Description;
 
             await _context.SaveChangesAsync();
+            _logger.LogInformation($"Category updated with ID: {category.Id} ");
             return true;
 
         }
@@ -122,6 +126,7 @@ namespace E_commerce_API.Services.Category
 
             if (category == null)
             {
+                _logger.LogWarning($"Category with ID: {id} not found for deletion.");
                 return false;
             }
 
@@ -133,6 +138,7 @@ namespace E_commerce_API.Services.Category
             }
 
             await _context.SaveChangesAsync();
+            _logger.LogInformation($"Category deleted with ID: {category.Id} ");
             return true;
 
 

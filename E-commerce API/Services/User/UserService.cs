@@ -8,10 +8,12 @@ namespace E_commerce_API.Services.User
     {
         //private readonly ICurrentUserService _currentUserService;
         private readonly AppDbContext _context;
+        private readonly ILogger<UserService> _logger;
 
-        public UserService(AppDbContext context)
+        public UserService(AppDbContext context, ILogger<UserService> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
 

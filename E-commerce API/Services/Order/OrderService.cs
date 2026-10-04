@@ -12,11 +12,13 @@ namespace E_commerce_API.Services.Order
     {
         private readonly ICurrentUserService _currentUserService;
         private readonly AppDbContext _context;
+        private readonly ILogger<OrderService> _logger;
 
-        public OrderService(ICurrentUserService currentUserService, AppDbContext context)
+        public OrderService(ICurrentUserService currentUserService, AppDbContext context , ILogger<OrderService> logger)
         {
             _currentUserService = currentUserService;
             _context = context;
+            _logger = logger;
         }
 
         public async Task<List<OrderDto>> GetAllOrders()
@@ -109,6 +111,7 @@ namespace E_commerce_API.Services.Order
             var order = await _context.Order.FirstOrDefaultAsync(o => o.Id == OrderId);
             if (order == null)
             {
+                _logger.LogWarning($"Order with ID {OrderId} not found. userid : {_currentUserService.UserId}");
                 return false;
             }
 
@@ -136,6 +139,7 @@ namespace E_commerce_API.Services.Order
                     return false;
             }
             await _context.SaveChangesAsync();
+            _logger.LogInformation($"Order with ID {OrderId} status updated to {order.stutes}. userid : {_currentUserService.UserId}");
             return true;
         }
 
@@ -148,6 +152,7 @@ namespace E_commerce_API.Services.Order
                 .FirstOrDefaultAsync(o => o.Id == OrderId && o.UserId == _currentUserService.UserId);
             if (order == null)
             {
+                _logger.LogWarning($"Order with ID {OrderId} not found or does not belong to the current user. userid : {_currentUserService.UserId}");
                 return false;
             }
             if (order.stutes == enStutes.Delivered || order.stutes == enStutes.Cancelled)
@@ -162,6 +167,7 @@ namespace E_commerce_API.Services.Order
 
             order.stutes = enStutes.Cancelled;
             await _context.SaveChangesAsync();
+            _logger.LogInformation($"Order with ID {OrderId} has been cancelled. userid : {_currentUserService.UserId}");
             return true;
         }
 

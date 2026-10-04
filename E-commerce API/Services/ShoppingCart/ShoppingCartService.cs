@@ -13,11 +13,13 @@ namespace E_commerce_API.Services.ShoppingCart
     {
         private readonly AppDbContext _context;
         private readonly ICurrentUserService _currentUserService;
+        private readonly ILogger<ShoppingCartService> _logger;
 
-        public ShoppingCartService(AppDbContext context, ICurrentUserService currentUserService)
+        public ShoppingCartService(AppDbContext context, ICurrentUserService currentUserService, ILogger<ShoppingCartService> logger)
         {
             _context = context;
             _currentUserService = currentUserService;
+            _logger = logger;
         }
 
         public async Task<ShoppingCartDto> GetMyCart()
@@ -91,6 +93,7 @@ namespace E_commerce_API.Services.ShoppingCart
 
                 foundProductinitem.quantity += quantity;
                 await _context.SaveChangesAsync();
+                _logger.LogInformation($"Product with ID: {product.Id} quantity updated in cart for user ID: {userid.Value}");
                 return true;
             }
 
@@ -106,6 +109,7 @@ namespace E_commerce_API.Services.ShoppingCart
 
             await _context.CartItems.AddAsync(cartitem);
             await _context.SaveChangesAsync();
+            _logger.LogInformation($"Product with ID: {product.Id} added to cart for user ID: {userid.Value}");
             return true;
 
         }
@@ -152,6 +156,7 @@ namespace E_commerce_API.Services.ShoppingCart
 
             foundProductinitem.quantity = quantity;
             await _context.SaveChangesAsync();
+            _logger.LogInformation($"Product with ID: {product.Id} quantity updated to {quantity} in cart for user ID: {userid.Value}");
 
 
             return true;
@@ -186,6 +191,7 @@ namespace E_commerce_API.Services.ShoppingCart
 
             _context.CartItems.Remove(result);           // hard deleted
             await _context.SaveChangesAsync();
+            _logger.LogInformation($"Product with ID: {ProductId} removed from cart for user ID: {userid}");
 
             return true;
         }
@@ -213,6 +219,7 @@ namespace E_commerce_API.Services.ShoppingCart
 
              _context.CartItems.RemoveRange(result);           // hard deleted
             await _context.SaveChangesAsync();
+            _logger.LogInformation($"All products removed from cart for user ID: {userid}");
 
             return true;
         }
@@ -302,12 +309,14 @@ namespace E_commerce_API.Services.ShoppingCart
                 _context.CartItems.RemoveRange(result);           // hard deleted
 
                 await _context.SaveChangesAsync();
+                _logger.LogInformation($"Checkout completed for user ID: {userid}, Order ID: {order.Id}, Total Price: {totalprice}");
 
                 await transaction.CommitAsync();
                 return new OrderDto {Id =order.Id,Address= order.shippingAddress, userId= order.UserId, totalPrice = order.totalPrice, stutes= order.stutes };
             }
             catch
             {
+                _logger.LogError($"Checkout failed for user ID: {_currentUserService.UserId}");
                 await transaction.RollbackAsync();
                 return null;
             }

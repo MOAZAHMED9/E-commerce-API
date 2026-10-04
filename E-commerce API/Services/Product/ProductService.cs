@@ -10,10 +10,12 @@ namespace E_commerce_API.Services.Product
     public class ProductService : IProductService
     {
         private readonly AppDbContext _context;
+        private readonly ILogger<ProductService> _logger;
 
-        public ProductService(AppDbContext context)
+        public ProductService(AppDbContext context , ILogger<ProductService> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         
@@ -71,6 +73,7 @@ namespace E_commerce_API.Services.Product
             var category = await _context.Categore.AnyAsync(x=> x.Id == dto.CategoryId);
             if (!category)
             {
+                _logger.LogWarning("Category with ID {CategoryId} does not exist.", dto.CategoryId);
                 return null;
             }
 
@@ -78,6 +81,7 @@ namespace E_commerce_API.Services.Product
 
             if (found)
             {
+                _logger.LogWarning("Product with name {ProductName} already exists in category {CategoryId}.", dto.Name, dto.CategoryId);
                 return null;
             }
 
@@ -93,6 +97,7 @@ namespace E_commerce_API.Services.Product
 
             await _context.Products.AddAsync(product);
             await _context.SaveChangesAsync();
+            _logger.LogInformation("Product created with ID: {ProductId}", product.Id);
 
             return await GetProductById(product.Id);
              
@@ -107,6 +112,7 @@ namespace E_commerce_API.Services.Product
 
             if (!category)
             {
+
                 return false;
             }
 
@@ -129,6 +135,7 @@ namespace E_commerce_API.Services.Product
 
 
             await _context.SaveChangesAsync();
+            _logger.LogInformation($"Product updated with ID: {found.Id}");
 
             return true;
 
@@ -145,6 +152,7 @@ namespace E_commerce_API.Services.Product
             var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
             product.Stock = newStock;
             await _context.SaveChangesAsync();
+            _logger.LogInformation($"Product stock updated with ID: {product.Id}");
             return true;
         }
 
@@ -160,11 +168,13 @@ namespace E_commerce_API.Services.Product
             var product = await _context.Products.FirstOrDefaultAsync(x => x.Id == id);
             if (product == null)
             {
+                _logger.LogWarning($"Product with ID: {id} not found for deletion.");
                 return false;
             }
 
             product.IsDeleted = true;
             await _context.SaveChangesAsync();
+            _logger.LogInformation($"Product deleted with ID: {product.Id}");
             return true;
 
         }

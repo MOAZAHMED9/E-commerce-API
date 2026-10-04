@@ -10,11 +10,13 @@ namespace E_commerce_API.Services.Review
     {
         private readonly AppDbContext _context;
         private readonly ICurrentUserService _currentUserService;
+        private readonly ILogger<ReviewService> _logger;    
 
-        public ReviewService(AppDbContext context, ICurrentUserService currentUserService)
+        public ReviewService(AppDbContext context, ICurrentUserService currentUserService, ILogger<ReviewService> logger)
         {
             _context = context;
             _currentUserService = currentUserService;
+            _logger = logger;
         }
 
         public async Task<List<ReviewDto>> GetAllReviews()
@@ -111,6 +113,7 @@ namespace E_commerce_API.Services.Review
 
             _context.Reviews.Add(review);
             await _context.SaveChangesAsync();
+            _logger.LogInformation("Review created with ID: {ReviewId} by User: {UserId}", review.Id, _currentUserService.UserId);
 
             return await GetReviewById(review.Id);
         }
@@ -128,6 +131,7 @@ namespace E_commerce_API.Services.Review
             review.rate = reviewDto.rate;
             review.comment = reviewDto.comment;
             await _context.SaveChangesAsync();
+            _logger.LogInformation("Review updated with ID: {ReviewId} by User: {UserId}", review.Id, _currentUserService.UserId);
             return true;
         }
 
@@ -140,6 +144,7 @@ namespace E_commerce_API.Services.Review
             }
             _context.Reviews.Remove(review);
             await _context.SaveChangesAsync();
+            _logger.LogInformation("Review deleted with ID: {ReviewId} by User: {UserId}", review.Id, _currentUserService.UserId);
             return true;
         }
     }
