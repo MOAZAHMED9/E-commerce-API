@@ -150,12 +150,13 @@ namespace E_commerce_API.Services.Order
                 .Include(x=> x.OrderItems)
                 .ThenInclude(oi => oi.Product)
                 .FirstOrDefaultAsync(o => o.Id == OrderId && o.UserId == _currentUserService.UserId);
+
             if (order == null)
             {
                 _logger.LogWarning($"Order with ID {OrderId} not found or does not belong to the current user. userid : {_currentUserService.UserId}");
                 return false;
             }
-            if (order.stutes == enStutes.Delivered || order.stutes == enStutes.Cancelled)
+            if (order.stutes != enStutes.Processing || order.stutes != enStutes.Pending)
             {
                 return false;
             }

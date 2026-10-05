@@ -2,6 +2,7 @@
 using E_commerce_API.Data;
 using E_commerce_API.Middleware;
 using E_commerce_API.Services.Audit;
+using E_commerce_API.Services.Auth;
 using E_commerce_API.Services.Category;
 using E_commerce_API.Services.Dashboard;
 using E_commerce_API.Services.Order;
@@ -18,6 +19,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using System.Threading.RateLimiting;
 using Training_Center_Management_API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,6 +41,7 @@ builder.Services.AddDbContext<AppDbContext>(option =>
 
 
 builder.Services.AddScoped<IJwtService,JwtService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICurrentUserService,CurrentUserService>();
 builder.Services.AddScoped<ICategoryService,CategorySesvice>();
 builder.Services.AddScoped<IProductService,ProductService>();
@@ -48,6 +51,7 @@ builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthorizationHandler, CustomerOwnerOrAdminHandler>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+
 
 
 
@@ -64,21 +68,26 @@ builder.Services.AddAuthorization(options =>                       // تجهيو
 
 
 
+
 builder.Services.AddRateLimiter(options =>
 {
-    options.AddFixedWindowLimiter("AuthPolicy", limiterOptions =>
+    options.AddPolicy("AuthPolicy", httpContext =>
     {
-        limiterOptions.PermitLimit = 5;
+        var ip = httpContext.Connection.RemoteIpAddress?.ToString()
+                 ?? "unknown";
 
-        limiterOptions.Window = TimeSpan.FromMinutes(1);
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: ip,
 
-        limiterOptions.QueueLimit = 0;                 //متخزنش طلب
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            });
+
     });
-
-    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });                    //   بولسي ال ليمت 
-
-
 
 
 
@@ -96,20 +105,25 @@ builder.Services.AddSwaggerGen(options =>
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
+    {
+        new OpenApiSecurityScheme
         {
-            new OpenApiSecurityScheme
+            Reference = new OpenApiReference
             {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-                Array.Empty<string>()
+                Type = ReferenceType.SecurityScheme,
+                Id = "Bearer"
+            }
+        },
+            Array.Empty<string>()
 
-        }
+    }
     });
 });       //زرار ال authorize
+
+
+
+
+
 
 
 builder.Services.AddHttpContextAccessor();
@@ -155,9 +169,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
 
-app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseMiddleware<SecurityLoggingMiddleware>();
@@ -166,5 +180,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
-/// عايزين نشوف الترتيب 
+
+app.Run();   
+
+    // عايزين نشوف الترتيب 

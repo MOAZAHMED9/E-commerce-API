@@ -1,4 +1,5 @@
-﻿using E_commerce_API.DTOs.User;
+﻿using E_commerce_API.DTOs.Common;
+using E_commerce_API.DTOs.User;
 using E_commerce_API.Services.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -8,7 +9,7 @@ namespace E_commerce_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -19,7 +20,7 @@ namespace E_commerce_API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<UserDto>> GetAllUsers([FromQuery] bool? Active)
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers([FromQuery] bool? Active)
         {
             var users = await _userService.GetAllUsers(Active);
             return Ok(users);
@@ -36,6 +37,26 @@ namespace E_commerce_API.Controllers
                 return NotFound();
             }
             return Ok(user);
+        }
+
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> AlterActive(int id,  bool Active = true)
+        {
+            var result = await _userService.AlterActive(id, Active);
+            if (!result)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
+        }
+
+        [HttpGet("Search")]
+        public async Task<ActionResult<PagedResultDto<UserDto>>> Search([FromQuery] UserSearchQuereDto searchQuere)
+        {
+            var result = await _userService.GetAllUsersWithPagination(searchQuere);
+            return Ok(result);
         }
     }
 }

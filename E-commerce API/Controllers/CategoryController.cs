@@ -48,7 +48,7 @@ namespace E_commerce_API.Controllers
 
         [Authorize(Roles ="Admin")]
         [HttpPost("CreateCategory")]
-        public async Task<ActionResult<CategoryDto>> CreateCategory([FromQuery]CreateCategoryDto dto)
+        public async Task<ActionResult<CategoryDto>> CreateCategory([FromBody]CreateCategoryDto dto)
         {
             var result = await _categoryService.CreateCategory(dto);
             if (result == null)
@@ -64,7 +64,7 @@ namespace E_commerce_API.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPut("UpdateCategory")]
-        public async Task<IActionResult> UpdateCategory(int id,[FromQuery] UpdateCateguryDto dto)
+        public async Task<IActionResult> UpdateCategory(int id,[FromBody] UpdateCateguryDto dto)
         {
             var result = await _categoryService.UpdataCategoury(id, dto);
 

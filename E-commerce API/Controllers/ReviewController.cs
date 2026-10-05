@@ -44,17 +44,22 @@ namespace E_commerce_API.Controllers
 
 
 
-        [Authorize(Roles = "Customer")]
+        [Authorize(Roles = "Coustomer")]
         [HttpPost]
         public async Task<ActionResult<ReviewDto>> CreateReview(CreateReview reviewDto)
         {
             var createdReview = await _reviewService.CreateReview(reviewDto);
+            if (createdReview == null)
+            {
+                return BadRequest("Invalid review data.");
+            }
+
             return CreatedAtAction(nameof(GetReviewById), new { id = createdReview.Id }, createdReview);
         }
 
 
 
-        [Authorize(Roles = "Customer")]
+        [Authorize(Roles = "Coustomer")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateReview(int id, UpdateReviewDto reviewDto)
         {
@@ -67,7 +72,7 @@ namespace E_commerce_API.Controllers
         }
 
 
-        [Authorize (Policy = "CustomerOwner")]
+        //[Authorize (Policy = "CustomerOwner")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReview(int id)
         {

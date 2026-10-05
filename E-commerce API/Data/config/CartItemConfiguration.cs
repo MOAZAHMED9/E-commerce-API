@@ -14,6 +14,7 @@ namespace E_commerce_API.Data.config
                 .HasForeignKey(x=>x.ShoppingCartId);
 
             builder.HasQueryFilter(x => !x.IsDeleted );
+            builder.HasIndex(x=> new { x.ProductId, x.ShoppingCartId }).IsUnique();
         }
     }
 }

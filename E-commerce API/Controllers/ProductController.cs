@@ -54,7 +54,7 @@ namespace E_commerce_API.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost("CreateProduct")]
-        public async Task<ActionResult<ProductDto>> CreateProduct([FromQuery]CreateProductDto dto)
+        public async Task<ActionResult<ProductDto>> CreateProduct([FromBody] CreateProductDto dto)
         {
             var result = await _productService.CreateProduct(dto);
             if (result == null)
@@ -70,7 +70,7 @@ namespace E_commerce_API.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPut("UpdateProduct")]
-        public async Task<IActionResult> UpdateProduct(int id, [FromQuery] UpdateProductDto dto)
+        public async Task<IActionResult> UpdateProduct(int id, [FromBody] UpdateProductDto dto)
         {
             var result = await _productService.UpdateProduct(id, dto);
 
@@ -104,11 +104,11 @@ namespace E_commerce_API.Controllers
         [HttpPut("UpdateQuantity")]
         public async Task<IActionResult> UpdateStock(int id, int newStock)
         {
-            var result= await _productService.UpdateStock(id, newStock);
+            var result = await _productService.UpdateStock(id, newStock);
 
             if (!result)
             {
-                return BadRequest("Quantity is Wrong");
+                return BadRequest("An error occurred while updating the stock quantity.");
             }
 
             return Ok("Update Quantity Succsessful");
@@ -119,8 +119,8 @@ namespace E_commerce_API.Controllers
         public async Task<ActionResult<PagedResultDto<ProductDto>>> Search([FromQuery] ProductSearchQuereDto searchQuere)
         {
             var result = await _productService.Search(searchQuere);
-         
-            if(result==null)
+
+            if (result == null)
             {
                 return BadRequest();
             }
@@ -138,5 +138,19 @@ namespace E_commerce_API.Controllers
 
 
 
+        [HttpPut]
+        [Authorize(Roles = "Admin")]
+        [Route("UpdateProductAvailability/{productId}")]
+        public async Task<IActionResult> UpdateProductAvailability(int productId, [FromQuery] bool isAvailable= true)
+        {
+            var result = await _productService.AlterActive(productId, isAvailable);
+            if (!result)
+            {
+                return BadRequest("An error occurred while updating the product availability.");
+            }
+
+            return Ok("Product availability updated successfully.");
+
+        }
     }
 }

@@ -22,7 +22,12 @@ namespace Training_Center_Management_API.Middleware
                 await _next(context);
             }
 
+            catch (DbUpdateConcurrencyException ex)
+            {
+                _logger.LogWarning(ex, "Concurrency conflict occurred.");
 
+                await HandleExceptionAsync(context, HttpStatusCode.Conflict, "The data was modified by another request. Please try again.");
+            }
             catch (DbUpdateException ex)
             {
                 _logger.LogError(ex, "Database error occurred");
@@ -32,7 +37,7 @@ namespace Training_Center_Management_API.Middleware
 
             catch (Exception ex)
             {
-                _logger.LogError(ex,"An unexpected error occurred");
+                _logger.LogError(ex, "An unexpected error occurred");
 
                 await HandleExceptionAsync(context, HttpStatusCode.InternalServerError, "An unexpected error occurred.");
             }

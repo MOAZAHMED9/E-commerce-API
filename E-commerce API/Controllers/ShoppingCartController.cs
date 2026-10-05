@@ -79,7 +79,7 @@ namespace E_commerce_API.Controllers
         }
 
         [HttpPost("Chickout")]
-        public async Task<IActionResult> Checkout(string Address)
+        public async Task<IActionResult> Checkout([FromBody] string Address)
         {
             var result = await _shoppingCartService.CheckoutAsync(Address);
             if (result==null)

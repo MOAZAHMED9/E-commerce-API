@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using E_commerce_API.DTOs.Auth;
 using Microsoft.AspNetCore.RateLimiting;
+using E_commerce_API.Services.Audit;
+using E_commerce_API.Services.Auth;
 
 namespace E_commerce_API.Controllers
 {
@@ -16,76 +18,48 @@ namespace E_commerce_API.Controllers
     [EnableRateLimiting("AuthPolicy")]
     public class AuthController : ControllerBase
     {
-        private readonly AppDbContext _context;
+
+        private readonly IAuthService _authService;
         private readonly IJwtService _jwtService;
-        public AuthController(AppDbContext context , IJwtService jwtService)
+
+
+        public AuthController(IAuthService authService, IJwtService jwtService)
         {
-            _context = context;
+            _authService = authService;
             _jwtService = jwtService;
         }
 
 
-
         [HttpPost("Register")]
-        public async Task<IActionResult> Register([FromQuery] RegisterDTO register)
+        public async Task<IActionResult> Register(RegisterDTO register)
         {
-            var chick = await _context.Users.AnyAsync(x=> x.Email==register.Email);
+            var user = await _authService.Register(register);
 
-            if (chick)
+            if (user == null)
             {
-                return BadRequest("Email already exists.");
+                return Conflict("Email already exists.");
             }
 
-            if (register.Password != register.confirmPassword)
-            {
-                return BadRequest("Password is Wronge");
-            }
-
-
-            var user = new User
-            {
-                Email = register.Email,
-                Password = BCrypt.Net.BCrypt.HashPassword(register.Password),
-                UserName = register.FullName,
-                Phone = register.phone,
-                Role = enRole.Coustomer,
-                IsActive = true,
-                ShoppingCart = new ShoppingCart()
-
-            };
-
-
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
-
-            var AccessToken = _jwtService.GenrateToken(user);
-            var refreshtoken = await _jwtService.GenerateRefreshToken(user);
+            var accessToken = _jwtService.GenrateToken(user);
+            var refreshToken = await _jwtService.GenerateRefreshToken(user);
 
             return Ok(new
             {
-                AccessToken = AccessToken,
-                RefreshToken = refreshtoken,
+                AccessToken = accessToken,
+                RefreshToken = refreshToken
             });
         }
-
 
 
 
         [HttpPost("Login")]
-        public async Task<IActionResult> Login([FromQuery] LoginDto dto)
+        public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == dto.Email);
+            var user = await _authService.Login(dto);
+
             if (user == null)
             {
                 return Unauthorized("Invalid email or password.");
-            }
-
-            var pass= BCrypt.Net.BCrypt.Verify(dto.Password, user.Password);
-
-            if (!pass) 
-            {
-                return Unauthorized("Invalid email or password.");
-
             }
 
             var AccessToken = _jwtService.GenrateToken(user);
@@ -101,47 +75,18 @@ namespace E_commerce_API.Controllers
         }
 
 
+
         [HttpPost("Logout")]
         [Authorize]
-        public async Task<IActionResult> Logout([FromQuery] RefreshDto dto)
+        public async Task<IActionResult> Logout([FromBody] RefreshDto dto)
         {
-         
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == dto.Email);
-
-
-            if (user == null)
+           var result = await _authService.Logout(dto);
+            if (!result)
             {
-
-                return Unauthorized("Invalid refresh token.");
+                return BadRequest("Invalid refresh token.");
             }
-
-            user.RefreshTokenRevokedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-
-
             return Ok("Logged out successfully.");
-
         }
-
-
-
-
-
-
-        //[HttpPost("Logt")]
-        ////[Authorize]
-        //public async Task<IActionResult> test( int id)
-        //{
-
-        //    var category = await _context.Categore
-        //       //.Include(x => x.Products)
-        //       .Select(x=> new {x.Name,x.Products,x.Id})
-        //       .FirstOrDefaultAsync(x => x.Id == id);
-        //    return Ok(category);
-        //}
-
-
-
 
     }
 }

@@ -5,6 +5,7 @@ namespace E_commerce_API.DTOs.Review
     public class CreateReview
     {
         [Range(1, 10)]
+        [Required]
 
         public int rate { get; set; }
 

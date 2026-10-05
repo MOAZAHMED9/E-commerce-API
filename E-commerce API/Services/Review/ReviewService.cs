@@ -36,6 +36,7 @@ namespace E_commerce_API.Services.Review
             return result;
         }
 
+
         public async Task<List<ReviewDto>> GetReviewsByProductId(int productId)
         {
             var result = await _context.Reviews
@@ -48,6 +49,7 @@ namespace E_commerce_API.Services.Review
                     UserName = r.User.UserName,
                     CreatedAt = r.CreateAt,
                 })
+                .OrderByDescending(r => r.Rate)
                 .ToListAsync();
 
             return result;
@@ -137,9 +139,11 @@ namespace E_commerce_API.Services.Review
 
         public async Task<bool> DeleteReview(int reviewId)
         {
-            var review = await _context.Reviews.FindAsync(reviewId);
+            var userId = _currentUserService.UserId;
+            var review = await _context.Reviews.FirstOrDefaultAsync(x=> x.Id==reviewId && x.UserId==userId);
             if (review == null)
             {
+                _logger.LogWarning("Attempt to delete review with ID: {ReviewId} by User: {UserId} failed - review not found or user not authorized", reviewId, userId);
                 return false;
             }
             _context.Reviews.Remove(review);

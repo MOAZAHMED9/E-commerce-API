@@ -9,7 +9,7 @@ namespace E_commerce_API.DTOs.Product
         [Required]
         public string Description { get; set; }
         [Required]
-        [Range(1, int.MaxValue)]
+        [Range(0.01, double.MaxValue)]
         public decimal price { get; set; }
         [Required]
         [Range (0, int.MaxValue)]

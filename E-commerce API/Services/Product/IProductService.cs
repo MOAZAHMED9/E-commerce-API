@@ -15,5 +15,6 @@ namespace E_commerce_API.Services.Product
         Task<bool> UpdateStock(int id , int newStock);
 
         Task<PagedResultDto<ProductDto>> Search(ProductSearchQuereDto searchQuere);
+        Task<bool> AlterActive(int id, bool isActive);
     }
 }

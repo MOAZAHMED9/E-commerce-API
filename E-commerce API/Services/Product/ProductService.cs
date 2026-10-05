@@ -116,7 +116,7 @@ namespace E_commerce_API.Services.Product
                 return false;
             }
 
-            var found = await _context.Products.FirstOrDefaultAsync(x => x.Name == dto.Name && x.CategoreId == dto.CategoryId);
+            var found = await _context.Products.FirstOrDefaultAsync(x => x.Id == id && x.CategoreId == dto.CategoryId);
 
             if (found == null)
             {
@@ -150,6 +150,12 @@ namespace E_commerce_API.Services.Product
             }
 
             var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+            if (product == null)
+            {
+                _logger.LogWarning($"Product with ID: {id} not found for stock update.");
+                return false;
+            }
+
             product.Stock = newStock;
             await _context.SaveChangesAsync();
             _logger.LogInformation($"Product stock updated with ID: {product.Id}");
@@ -179,7 +185,7 @@ namespace E_commerce_API.Services.Product
 
         }
 
-        public async Task<PagedResultDto<ProductDto>> Search([FromQuery] ProductSearchQuereDto searchQuere)
+        public async Task<PagedResultDto<ProductDto>> Search(ProductSearchQuereDto searchQuere)
         {
             var quere = _context.Products.AsQueryable();
 
@@ -201,7 +207,7 @@ namespace E_commerce_API.Services.Product
 
             if(searchQuere.minprice!=null)
             {
-                quere = quere.Where(x => x.Price >= searchQuere.maxprice);
+                quere = quere.Where(x => x.Price >= searchQuere.minprice);
             }
 
             if(searchQuere.id!=null)
@@ -246,7 +252,7 @@ namespace E_commerce_API.Services.Product
                 quere = quere.OrderBy(s => s.Id);
             }
 
-            var totalcount = quere.Count();
+            var totalcount = await quere.CountAsync();
 
             var pagenumber = searchQuere.pagenumber <1? 1 : searchQuere.pagenumber;
 
@@ -278,6 +284,25 @@ namespace E_commerce_API.Services.Product
             };
         }
 
-    
+        public async Task<bool> AlterActive(int id, bool isActive)
+        {
+            if (id < 1 )
+            {
+                return false;
+            }
+            
+            var product = await _context.Products.FirstOrDefaultAsync(x => x.Id == id);
+            if (product == null)
+            {
+                _logger.LogWarning($"Product with ID: {id} not found for active status update.");
+                return false;
+            }
+
+            product.IsAvailable = isActive;
+            await _context.SaveChangesAsync();
+            _logger.LogInformation($"Product active status updated with ID: {product.Id}");
+            return true;
+        }
+
     }
 }

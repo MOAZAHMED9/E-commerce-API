@@ -6,6 +6,7 @@ using E_commerce_API.Services.Audit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using OrderItem = E_commerce_API.Models.OrderItem;
+using Microsoft.IdentityModel.SecurityTokenService;
 
 namespace E_commerce_API.Services.ShoppingCart
 {
@@ -59,12 +60,12 @@ namespace E_commerce_API.Services.ShoppingCart
 
 
             var product = await _context.Products
-                .Where(x => x.Id == id)
+                .Where(x => x.Id == id && x.IsAvailable)
                 .Select(s => new { s.Id, s.Stock })
                 .FirstOrDefaultAsync();
 
 
-            if (product == null || quantity> product.Stock)
+            if (product == null || quantity > product.Stock)
             {
                 return false;
             }
@@ -74,15 +75,15 @@ namespace E_commerce_API.Services.ShoppingCart
             var userid = _currentUserService.UserId;
 
             var shopcart = await _context.ShoppingCarts
-                .Where(x=>x.UserId == userid.Value)
-                .Select(x=>x.Id)
+                .Where(x => x.UserId == userid.Value)
+                .Select(x => x.Id)
                 .FirstOrDefaultAsync();
 
 
 
             //بشوف في product موجود ف نفس ال shopcart 
             var foundProductinitem = await _context.CartItems
-                .FirstOrDefaultAsync(x=> x.ProductId==product.Id && x.ShoppingCartId == shopcart);
+                .FirstOrDefaultAsync(x => x.ProductId == product.Id && x.ShoppingCartId == shopcart);
 
             if (foundProductinitem != null)
             {
@@ -127,7 +128,7 @@ namespace E_commerce_API.Services.ShoppingCart
 
 
             var product = await _context.Products
-                .Where(x => x.Id == Productid)
+                .Where(x => x.Id == Productid && x.IsAvailable)
                 .Select(s => new { s.Id, s.Stock })
                 .FirstOrDefaultAsync();
 
@@ -166,12 +167,12 @@ namespace E_commerce_API.Services.ShoppingCart
 
         public async Task<bool> DeleteProduct(int ProductId)
         {
-            if(ProductId< 1)
+            if (ProductId < 1)
             {
                 return false;
             }
 
-            var userid = _currentUserService.UserId.Value;
+            var userid = _currentUserService.UserId;
 
             var shopcart = await _context.ShoppingCarts
                .Where(x => x.UserId == userid)
@@ -182,7 +183,7 @@ namespace E_commerce_API.Services.ShoppingCart
 
 
             var result = await _context.CartItems
-                .FirstOrDefaultAsync(x=> x.ProductId == ProductId &&  x.ShoppingCartId == shopcart);
+                .FirstOrDefaultAsync(x => x.ProductId == ProductId && x.ShoppingCartId == shopcart);
 
             if (result == null)
             {
@@ -217,7 +218,7 @@ namespace E_commerce_API.Services.ShoppingCart
                 return true;
             }
 
-             _context.CartItems.RemoveRange(result);           // hard deleted
+            _context.CartItems.RemoveRange(result);           // hard deleted
             await _context.SaveChangesAsync();
             _logger.LogInformation($"All products removed from cart for user ID: {userid}");
 
@@ -226,12 +227,12 @@ namespace E_commerce_API.Services.ShoppingCart
 
 
 
-        public async Task<OrderDto> CheckoutAsync(string address)
+        public async Task<OrderDto?> CheckoutAsync(string address)
         {
 
             using var transaction = await _context.Database.BeginTransactionAsync(); // لو حصل اي error في اي حاجه بعد ما عملت ال checkout  و قبل ما اعمل save changes  هيعمل rollback و يرجع كل حاجه زي ما كانت قبل ال checkout
 
-            try 
+            try
             {
                 var userid = _currentUserService.UserId.Value;
 
@@ -250,12 +251,18 @@ namespace E_commerce_API.Services.ShoppingCart
 
                 if (result.IsNullOrEmpty())
                 {
+                    throw new BadRequestException("Your cart is empty.");
                     return null;
                 }
 
                 // حلينا مشكله ال N+1 query problem  لما جبت الكارت ايتيم من غير ال include  و بعدين كل كارت ايتيم عملت عليه access لل product  كل واحد فيهم عمل query لوحده و ده هيزود ال queries علي الداتا بيز  و هيبطئ الاداء
                 foreach (var item in result)
                 {
+                    if (item.Product == null)
+                    {
+                        return null;
+                    }
+
                     if (!item.Product.IsAvailable)
                     {
                         return null;
@@ -299,28 +306,41 @@ namespace E_commerce_API.Services.ShoppingCart
 
                     };
                     await _context.OrderItems.AddAsync(orderitem);
-                };
+                }
+                
 
                 foreach (var item in result)
                 {
-                    item.Product.Stock -= item.quantity;
+                    var affected = await _context.Products
+                    .Where(p => p.Id == item.ProductId && p.IsAvailable && p.Stock >= item.quantity)
+
+                    .ExecuteUpdateAsync(s => s.SetProperty(p => p.Stock, p => p.Stock - item.quantity)); ///////////????
+
+                    if (affected == 0)
+                    {
+                        throw new InvalidOperationException($"Not enough stock for product {item.ProductId}");
+                    }
                 }
 
                 _context.CartItems.RemoveRange(result);           // hard deleted
 
                 await _context.SaveChangesAsync();
-                _logger.LogInformation($"Checkout completed for user ID: {userid}, Order ID: {order.Id}, Total Price: {totalprice}");
 
                 await transaction.CommitAsync();
-                return new OrderDto {Id =order.Id,Address= order.shippingAddress, userId= order.UserId, totalPrice = order.totalPrice, stutes= order.stutes };
+              
+                _logger.LogInformation($"Checkout completed for user ID: {userid}, Order ID: {order.Id}, Total Price: {totalprice}");
+                
+                return new OrderDto { Id = order.Id, Address = order.shippingAddress, userId = order.UserId, totalPrice = order.totalPrice, stutes = order.stutes };
             }
-            catch
+            catch (Exception ex)
             {
-                _logger.LogError($"Checkout failed for user ID: {_currentUserService.UserId}");
-                await transaction.RollbackAsync();
-                return null;
-            }
-        }    
+                _logger.LogError(ex, "Checkout failed for user ID: {UserId}", _currentUserService.UserId);
 
+                await transaction.RollbackAsync();
+
+                throw;
+            }
+
+        }
     }
 }

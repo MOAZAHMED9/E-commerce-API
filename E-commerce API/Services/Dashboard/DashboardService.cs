@@ -22,8 +22,8 @@ namespace E_commerce_API.Services.Dashboard
             var totalProducts = await _context.Products.CountAsync();
             var pendingOrders = await _context.Order.CountAsync(o => o.stutes == enStutes.Pending);
             var deliveredOrders = await _context.Order.CountAsync(o => o.stutes == enStutes.Delivered);
-            var cancelledOrders = await _context.Order.Where(x=> x.stutes != enStutes.Cancelled).CountAsync(o => o.stutes == enStutes.Cancelled);
-            var totalRevenue = await _context.Order.SumAsync(o => o.totalPrice);
+            var cancelledOrders = await _context.Order.CountAsync(o => o.stutes == enStutes.Cancelled);
+            var totalRevenue = await _context.Order.Where(x=>x.stutes != enStutes.Cancelled).SumAsync(o => o.totalPrice);
             var topSellingProducts = await _context.OrderItems
                 .GroupBy(oi => new { oi.ProductId, oi.Product.Name })
                 .Select(g => new TopSellingProductDto
