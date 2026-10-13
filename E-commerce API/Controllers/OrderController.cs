@@ -1,4 +1,5 @@
 ﻿using E_commerce_API.DTOs.Order;
+using E_commerce_API.Models;
 using E_commerce_API.Services.Order;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -17,7 +18,7 @@ namespace E_commerce_API.Controllers
         }
 
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         [HttpGet]
         public async Task<ActionResult<List<OrderDto>>> GetAllOrders()
         {
@@ -26,7 +27,7 @@ namespace E_commerce_API.Controllers
         }
 
 
-        [Authorize(Roles = "Coustomer")]
+        [Authorize(Roles = Roles.Customer)]
         [HttpGet("myorders")]
         public async Task<ActionResult<List<MyOrderDto>>> GetMyOrders()
         {
@@ -35,7 +36,7 @@ namespace E_commerce_API.Controllers
         }
 
 
-        [Authorize(Roles = "Coustomer")]
+        [Authorize(Roles = Roles.Customer)]
         [HttpGet("myorder/{id}")]
         public async Task<ActionResult<MyOrderDto>> GetMyOrder(int id)
         {
@@ -49,7 +50,7 @@ namespace E_commerce_API.Controllers
 
 
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         [HttpPut("updateStatus/{orderId}")]
         public async Task<ActionResult> UpdateStatus(int orderId)
         {
@@ -64,7 +65,7 @@ namespace E_commerce_API.Controllers
 
 
 
-        [Authorize(Roles = "Coustomer")]
+        [Authorize(Roles = Roles.Customer)]
         [HttpPut("cancelOrder/{orderId}")]
         public async Task<ActionResult> CancelOrder(int orderId)
         {

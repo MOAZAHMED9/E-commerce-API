@@ -116,14 +116,14 @@ namespace E_commerce_API.Services.Product
                 return false;
             }
 
-            var found = await _context.Products.FirstOrDefaultAsync(x => x.Id == id && x.CategoreId == dto.CategoryId);
+            var found = await _context.Products.FirstOrDefaultAsync(x => x.Id == id );
 
             if (found == null)
             {
                 return false;
             }
 
-
+            
 
             found.Name = dto.Name;
             found.Description = dto.Description;
@@ -244,6 +244,11 @@ namespace E_commerce_API.Services.Product
                             : quere.OrderBy(s => s.Stock);
                         break;
 
+                    default:
+                        quere = searchQuere.desc ?
+                             quere.OrderByDescending(s => s.Stock)
+                            : quere.OrderBy(s => s.Stock);
+                        break;
 
                 }
             }

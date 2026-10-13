@@ -156,7 +156,7 @@ namespace E_commerce_API.Services.Order
                 _logger.LogWarning($"Order with ID {OrderId} not found or does not belong to the current user. userid : {_currentUserService.UserId}");
                 return false;
             }
-            if (order.stutes != enStutes.Processing || order.stutes != enStutes.Pending)
+            if (order.stutes != enStutes.Processing && order.stutes != enStutes.Pending)
             {
                 return false;
             }

@@ -20,7 +20,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using System.Threading.RateLimiting;
-using Training_Center_Management_API.Middleware;
+using E_commerce_API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -71,6 +71,7 @@ builder.Services.AddAuthorization(options =>                       // تجهيو
 
 builder.Services.AddRateLimiter(options =>
 {
+  
     options.AddPolicy("AuthPolicy", httpContext =>
     {
         var ip = httpContext.Connection.RemoteIpAddress?.ToString()
@@ -87,6 +88,8 @@ builder.Services.AddRateLimiter(options =>
             });
 
     });
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
 });                    //   بولسي ال ليمت 
 
 
@@ -126,7 +129,7 @@ builder.Services.AddSwaggerGen(options =>
 
 
 
-builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpContextAccessor();      // عشان نقدر نجيب ال userid من ال token في اي مكان في المشروع
 
 
 // علشان نشغل ال authourization

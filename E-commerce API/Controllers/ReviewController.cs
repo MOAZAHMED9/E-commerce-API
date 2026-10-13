@@ -1,4 +1,5 @@
 ﻿using E_commerce_API.DTOs.Review;
+using E_commerce_API.Models;
 using E_commerce_API.Services.Review;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -19,7 +20,7 @@ namespace E_commerce_API.Controllers
 
 
 
-
+        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<List<ReviewDto>>> GetAllReviews()
         {
@@ -28,7 +29,7 @@ namespace E_commerce_API.Controllers
         }
 
 
-
+        [AllowAnonymous]
         [HttpGet("{id}" , Name = "GetReviewById")]
         public async Task<ActionResult<ReviewDto>> GetReviewById(int id)
         {
@@ -44,7 +45,7 @@ namespace E_commerce_API.Controllers
 
 
 
-        [Authorize(Roles = "Coustomer")]
+        [Authorize(Roles = Roles.Customer)]
         [HttpPost]
         public async Task<ActionResult<ReviewDto>> CreateReview(CreateReview reviewDto)
         {
@@ -59,7 +60,7 @@ namespace E_commerce_API.Controllers
 
 
 
-        [Authorize(Roles = "Coustomer")]
+        [Authorize(Roles = Roles.Customer)]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateReview(int id, UpdateReviewDto reviewDto)
         {
@@ -73,6 +74,7 @@ namespace E_commerce_API.Controllers
 
 
         //[Authorize (Policy = "CustomerOwner")]
+        [Authorize(Roles = Roles.Customer)]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReview(int id)
         {

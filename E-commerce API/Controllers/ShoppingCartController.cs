@@ -1,4 +1,5 @@
 ﻿using E_commerce_API.DTOs.ShoppingCart;
+using E_commerce_API.Models;
 using E_commerce_API.Services.ShoppingCart;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -8,7 +9,7 @@ namespace E_commerce_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Coustomer")]
+    [Authorize(Roles = Roles.Customer)]
     public class ShoppingCartController : ControllerBase
     {
         private readonly IShoppingCartService _shoppingCartService;
@@ -31,10 +32,7 @@ namespace E_commerce_API.Controllers
         public async Task<IActionResult> AddProduct(int id, int quantity)
         {
             var result = await _shoppingCartService.AddProduct(id, quantity);
-            if (!result)
-            {
-                return BadRequest("Product or Quantity is Wrong");
-            }
+            
 
             return Ok("Done ");
 
@@ -45,11 +43,8 @@ namespace E_commerce_API.Controllers
         [HttpPut("UpdateQuantity")]
         public async Task<IActionResult> UpdateQuantity(int Productid, int quantity)
         {
-            var result = await _shoppingCartService.AddProduct(Productid, quantity);
-            if (!result)
-            {
-                return BadRequest("Product or Quantity is Wrong");
-            }
+            var result = await _shoppingCartService.UpdateQuantity(Productid, quantity);
+            
 
             return NoContent();
 
@@ -61,11 +56,7 @@ namespace E_commerce_API.Controllers
         {
             var result = await _shoppingCartService.DeleteProduct(ProductId);
 
-            if (!result)
-            {
-                return NotFound();
-            }
-
+           
             return NoContent();
         }
 
@@ -82,10 +73,7 @@ namespace E_commerce_API.Controllers
         public async Task<IActionResult> Checkout([FromBody] string Address)
         {
             var result = await _shoppingCartService.CheckoutAsync(Address);
-            if (result==null)
-            {
-                return BadRequest("Checkout failed.");
-            }
+           
             return Ok(result);
         }
 

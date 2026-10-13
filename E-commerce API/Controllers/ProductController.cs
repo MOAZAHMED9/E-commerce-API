@@ -2,6 +2,7 @@
 using E_commerce_API.DTOs.Common;
 using E_commerce_API.DTOs.Product;
 using E_commerce_API.DTOs.Review;
+using E_commerce_API.Models;
 using E_commerce_API.Services.Product;
 using E_commerce_API.Services.Review;
 using Microsoft.AspNetCore.Authorization;
@@ -26,7 +27,7 @@ namespace E_commerce_API.Controllers
         }
 
 
-
+        [AllowAnonymous]
         [HttpGet("GetAllProduct")]
         public async Task<ActionResult<IEnumerable<ProductDto>>> GetallProduct()
         {
@@ -36,7 +37,7 @@ namespace E_commerce_API.Controllers
 
         }
 
-
+        [AllowAnonymous]
         [HttpGet("{id}", Name = "GetProductById")]
         public async Task<ActionResult<ProductDto>> GetProductById(int id)
         {
@@ -52,7 +53,7 @@ namespace E_commerce_API.Controllers
 
 
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         [HttpPost("CreateProduct")]
         public async Task<ActionResult<ProductDto>> CreateProduct([FromBody] CreateProductDto dto)
         {
@@ -68,7 +69,7 @@ namespace E_commerce_API.Controllers
 
 
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         [HttpPut("UpdateProduct")]
         public async Task<IActionResult> UpdateProduct(int id, [FromBody] UpdateProductDto dto)
         {
@@ -86,7 +87,7 @@ namespace E_commerce_API.Controllers
 
 
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         [HttpDelete("DeleteProduct")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
@@ -100,7 +101,7 @@ namespace E_commerce_API.Controllers
         }
 
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         [HttpPut("UpdateQuantity")]
         public async Task<IActionResult> UpdateStock(int id, int newStock)
         {
@@ -115,6 +116,7 @@ namespace E_commerce_API.Controllers
         }
 
 
+        [AllowAnonymous]
         [HttpGet("SearchProduct")]
         public async Task<ActionResult<PagedResultDto<ProductDto>>> Search([FromQuery] ProductSearchQuereDto searchQuere)
         {
@@ -128,7 +130,7 @@ namespace E_commerce_API.Controllers
         }
 
 
-
+        [AllowAnonymous]
         [HttpGet("{productId}/reviews")]
         public async Task<ActionResult<List<ReviewDto>>> GetReviewsByProductId(int productId)
         {
@@ -139,7 +141,7 @@ namespace E_commerce_API.Controllers
 
 
         [HttpPut]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         [Route("UpdateProductAvailability/{productId}")]
         public async Task<IActionResult> UpdateProductAvailability(int productId, [FromQuery] bool isAvailable= true)
         {

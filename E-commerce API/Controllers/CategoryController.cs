@@ -1,4 +1,5 @@
 ﻿using E_commerce_API.DTOs.Category;
+using E_commerce_API.Models;
 using E_commerce_API.Services.Category;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -30,7 +31,7 @@ namespace E_commerce_API.Controllers
 
 
 
-
+        [AllowAnonymous]
         [HttpGet("{id}" ,Name ="GetById")]
         public async Task<ActionResult<CategoryDto>> GetcategoryById(int id)
         {
@@ -46,7 +47,7 @@ namespace E_commerce_API.Controllers
 
 
 
-        [Authorize(Roles ="Admin")]
+        [Authorize(Roles = Roles.Admin)]
         [HttpPost("CreateCategory")]
         public async Task<ActionResult<CategoryDto>> CreateCategory([FromBody]CreateCategoryDto dto)
         {
@@ -62,7 +63,7 @@ namespace E_commerce_API.Controllers
 
 
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         [HttpPut("UpdateCategory")]
         public async Task<IActionResult> UpdateCategory(int id,[FromBody] UpdateCateguryDto dto)
         {
@@ -79,7 +80,7 @@ namespace E_commerce_API.Controllers
 
 
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         [HttpDelete("DeleteCategory")]
         public async Task<IActionResult> DeleteCategory(int id)
         {

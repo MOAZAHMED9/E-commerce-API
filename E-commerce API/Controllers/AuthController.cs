@@ -29,19 +29,14 @@ namespace E_commerce_API.Controllers
             _jwtService = jwtService;
         }
 
-
+        [AllowAnonymous]
         [HttpPost("Register")]
-        public async Task<IActionResult> Register(RegisterDTO register)
+        public async Task<IActionResult> Register([FromBody]RegisterDTO register)
         {
             var user = await _authService.Register(register);
 
-            if (user == null)
-            {
-                return Conflict("Email already exists.");
-            }
-
-            var accessToken = _jwtService.GenrateToken(user);
-            var refreshToken = await _jwtService.GenerateRefreshToken(user);
+            var accessToken = _jwtService.GenrateToken(user!);
+            var refreshToken = await _jwtService.GenerateRefreshToken(user!);
 
             return Ok(new
             {
@@ -51,7 +46,7 @@ namespace E_commerce_API.Controllers
         }
 
 
-
+        [AllowAnonymous]
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
@@ -74,6 +69,25 @@ namespace E_commerce_API.Controllers
 
         }
 
+        [Authorize]
+        [HttpPost("RefreshToken")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshDto dto)
+        {
+            var user = await _authService.RefreshToken(dto);
+            if (user == null)
+            {
+                return Unauthorized("Invalid refresh token.");
+            }
+
+            var accessToken = _jwtService.GenrateToken(user);
+            var refreshToken = await _jwtService.GenerateRefreshToken(user);
+
+            return Ok(new
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken
+            });
+        }
 
 
         [HttpPost("Logout")]

@@ -3,6 +3,7 @@ using E_commerce_API.DTOs.Review;
 using E_commerce_API.Models;
 using E_commerce_API.Services.Audit;
 using Microsoft.EntityFrameworkCore;
+using E_commerce_API.Exception;
 
 namespace E_commerce_API.Services.Review
 {
@@ -82,12 +83,12 @@ namespace E_commerce_API.Services.Review
 
             var order = await _context.Order
                 .Include(o => o.OrderItems)
-                .FirstOrDefaultAsync(o => o.Id == reviewDto.orderId && o.UserId == _currentUserService.UserId && o.OrderItems.Any(x => x.ProductId == reviewDto.ProductId));
+                .FirstOrDefaultAsync(o => o.Id == reviewDto.orderId && o.UserId == _currentUserService.UserId && o.stutes==enStutes.Delivered && o.OrderItems.Any(x => x.ProductId == reviewDto.ProductId));
 
 
-            if (order == null || order.stutes != enStutes.Delivered)
+            if (order == null)
             {
-                return null; // order does not exist or is not delivered yet
+                throw new BadRequestException("You can only review a product from a delivered order.");
             }
 
             
@@ -100,7 +101,7 @@ namespace E_commerce_API.Services.Review
 
             if (existingReview)
             {
-                return null; // User has already reviewed this product
+                throw new BadRequestException("you already reviewed this product");
             }
 
 
@@ -124,7 +125,7 @@ namespace E_commerce_API.Services.Review
 
         public async Task<bool> UpdateReview(int reviewId, UpdateReviewDto reviewDto)
         {
-            var review = await _context.Reviews.FindAsync(reviewId);
+            var review = await _context.Reviews.FirstOrDefaultAsync(x => x.Id == reviewId && x.UserId == _currentUserService.UserId);
             if (review == null)
             {
                 return false;

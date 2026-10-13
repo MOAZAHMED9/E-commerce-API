@@ -6,6 +6,7 @@ using E_commerce_API.Services.TokenService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.SecurityTokenService;
 
 namespace E_commerce_API.Services.Auth
 {
@@ -29,12 +30,12 @@ namespace E_commerce_API.Services.Auth
 
             if (chick)
             {
-                return null;
+                throw new BadRequestException("Email already exists.");
             }
 
             if (register.Password != register.confirmPassword)
             {
-                return null;
+                throw new BadRequestException("Password and confirm password do not match.");
             }
 
             var user = new Models.User
@@ -59,7 +60,9 @@ namespace E_commerce_API.Services.Auth
 
         public async Task<Models.User?> Login( LoginDto dto)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == dto.Email);
+            var user = await _context.Users
+                .Where(x => x.IsActive)
+                .FirstOrDefaultAsync(x => x.Email == dto.Email);
             if (user == null)
             {
                 return null;
@@ -73,18 +76,13 @@ namespace E_commerce_API.Services.Auth
 
             }
 
-            if (!user.IsActive)
-            {
-                return null;
-            }
-
            
             return user;
         }
 
 
        
-        public async Task<bool> Logout([FromBody] RefreshDto dto)
+        public async Task<bool> Logout(RefreshDto dto)
         {
             var userid = _current.UserId;
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == dto.Email && x.Id == userid);
@@ -104,5 +102,25 @@ namespace E_commerce_API.Services.Auth
 
         }
 
+        public async Task<Models.User?> RefreshToken(RefreshDto dto)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == dto.Email);
+            if (user == null)
+            {
+                return null;
+            }
+
+            if(user.RefreshTokenExpiresAt< DateTime.UtcNow)
+            {
+                return null;
+            }
+            if(user.RefreshTokenRevokedAt != null)
+            {
+                
+                return null;
+            }
+            return user;
+
+        }
     }
 }

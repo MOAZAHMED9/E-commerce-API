@@ -6,7 +6,7 @@ using E_commerce_API.Services.Audit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using OrderItem = E_commerce_API.Models.OrderItem;
-using Microsoft.IdentityModel.SecurityTokenService;
+using E_commerce_API.Exception;
 
 namespace E_commerce_API.Services.ShoppingCart
 {
@@ -28,7 +28,7 @@ namespace E_commerce_API.Services.ShoppingCart
             var userid = _currentUserService.UserId;
 
             var cart = await _context.ShoppingCarts
-               .Where(s => s.UserId == userid.Value)
+               .Where(s => s.UserId == userid)
                .Select(s => new ShoppingCartDto
                {
                    Items = s.CartItems
@@ -55,7 +55,7 @@ namespace E_commerce_API.Services.ShoppingCart
 
             if (id < 1 || quantity < 1)
             {
-                return false;
+                throw new BadRequestException("Invalid product ID or quantity.");
             }
 
 
@@ -67,7 +67,7 @@ namespace E_commerce_API.Services.ShoppingCart
 
             if (product == null || quantity > product.Stock)
             {
-                return false;
+                throw new NotFoundException("Product not available or insufficient stock.");
             }
 
 
@@ -75,7 +75,7 @@ namespace E_commerce_API.Services.ShoppingCart
             var userid = _currentUserService.UserId;
 
             var shopcart = await _context.ShoppingCarts
-                .Where(x => x.UserId == userid.Value)
+                .Where(x => x.UserId == userid)
                 .Select(x => x.Id)
                 .FirstOrDefaultAsync();
 
@@ -89,12 +89,14 @@ namespace E_commerce_API.Services.ShoppingCart
             {
                 if (foundProductinitem.quantity + quantity > product.Stock)
                 {
-                    return false;
+                    throw new BadRequestException("Adding this quantity exceeds available stock.");
                 }
 
                 foundProductinitem.quantity += quantity;
                 await _context.SaveChangesAsync();
-                _logger.LogInformation($"Product with ID: {product.Id} quantity updated in cart for user ID: {userid.Value}");
+
+                _logger.LogInformation($"Product with ID: {product.Id} quantity updated in cart for user ID: {userid}");
+
                 return true;
             }
 
@@ -110,7 +112,7 @@ namespace E_commerce_API.Services.ShoppingCart
 
             await _context.CartItems.AddAsync(cartitem);
             await _context.SaveChangesAsync();
-            _logger.LogInformation($"Product with ID: {product.Id} added to cart for user ID: {userid.Value}");
+            _logger.LogInformation($"Product with ID: {product.Id} added to cart for user ID: {userid}");
             return true;
 
         }
@@ -123,7 +125,7 @@ namespace E_commerce_API.Services.ShoppingCart
 
             if (Productid < 1 || quantity < 1)
             {
-                return false;
+                throw new BadRequestException("Invalid product ID or quantity.");
             }
 
 
@@ -135,7 +137,7 @@ namespace E_commerce_API.Services.ShoppingCart
 
             if (product == null || quantity > product.Stock)
             {
-                return false;
+                throw new NotFoundException("Product not available or insufficient stock.");
             }
 
 
@@ -143,7 +145,7 @@ namespace E_commerce_API.Services.ShoppingCart
             var userid = _currentUserService.UserId;
 
             var shopcart = await _context.ShoppingCarts
-                .Where(x => x.UserId == userid.Value)
+                .Where(x => x.UserId == userid)
                 .Select(x => x.Id)
                 .FirstOrDefaultAsync();
 
@@ -152,12 +154,12 @@ namespace E_commerce_API.Services.ShoppingCart
 
             if (foundProductinitem == null)
             {
-                return false;
+                throw new NotFoundException("Product not found in cart.");
             }
 
             foundProductinitem.quantity = quantity;
             await _context.SaveChangesAsync();
-            _logger.LogInformation($"Product with ID: {product.Id} quantity updated to {quantity} in cart for user ID: {userid.Value}");
+            _logger.LogInformation($"Product with ID: {product.Id} quantity updated to {quantity} in cart for user ID: {userid}");
 
 
             return true;
@@ -169,7 +171,7 @@ namespace E_commerce_API.Services.ShoppingCart
         {
             if (ProductId < 1)
             {
-                return false;
+                throw new BadRequestException("Invalid product ID.");
             }
 
             var userid = _currentUserService.UserId;
@@ -187,7 +189,7 @@ namespace E_commerce_API.Services.ShoppingCart
 
             if (result == null)
             {
-                return false;
+                throw new NotFoundException("Product not found in cart.");
             }
 
             _context.CartItems.Remove(result);           // hard deleted
@@ -201,7 +203,7 @@ namespace E_commerce_API.Services.ShoppingCart
 
         public async Task<bool> ClearCart()
         {
-            var userid = _currentUserService.UserId.Value;
+            var userid = _currentUserService.UserId;
 
             var shopcart = await _context.ShoppingCarts
                .Where(x => x.UserId == userid)
@@ -239,20 +241,18 @@ namespace E_commerce_API.Services.ShoppingCart
 
                 var shopcart = await _context.ShoppingCarts
                    .Where(x => x.UserId == userid)
-
                    .FirstOrDefaultAsync();
 
                 var result = await _context.CartItems
                      .Where(x => x.ShoppingCartId == shopcart.Id)
                      .Include(x => x.Product)                     //لو جبت الكارت ايتيم من غيرها . النفجيشن مش هيكون محمل الداتا بتاعتها 
                      .ToListAsync();
-
+                
 
 
                 if (result.IsNullOrEmpty())
                 {
-                    throw new BadRequestException("Your cart is empty.");
-                    return null;
+                    throw new BadRequestException("Cart is empty.");
                 }
 
                 // حلينا مشكله ال N+1 query problem  لما جبت الكارت ايتيم من غير ال include  و بعدين كل كارت ايتيم عملت عليه access لل product  كل واحد فيهم عمل query لوحده و ده هيزود ال queries علي الداتا بيز  و هيبطئ الاداء
@@ -260,17 +260,17 @@ namespace E_commerce_API.Services.ShoppingCart
                 {
                     if (item.Product == null)
                     {
-                        return null;
+                        throw new NotFoundException($"Product with ID {item.ProductId} not found.");
                     }
 
                     if (!item.Product.IsAvailable)
                     {
-                        return null;
+                        throw new BadRequestException($"Product with ID {item.ProductId} is not available.");
                     }
 
                     if (item.quantity > item.Product.Stock)
                     {
-                        return null;
+                        throw new BadRequestException($"Not enough stock for product {item.ProductId}. Requested: {item.quantity}, Available: {item.Product.Stock}.");
                     }
                 }
 
@@ -311,6 +311,7 @@ namespace E_commerce_API.Services.ShoppingCart
 
                 foreach (var item in result)
                 {
+                    
                     var affected = await _context.Products
                     .Where(p => p.Id == item.ProductId && p.IsAvailable && p.Stock >= item.quantity)
 
@@ -318,7 +319,7 @@ namespace E_commerce_API.Services.ShoppingCart
 
                     if (affected == 0)
                     {
-                        throw new InvalidOperationException($"Not enough stock for product {item.ProductId}");
+                        throw new BadRequestException($"Not enough stock for product {item.ProductId}");
                     }
                 }
 
@@ -332,7 +333,7 @@ namespace E_commerce_API.Services.ShoppingCart
                 
                 return new OrderDto { Id = order.Id, Address = order.shippingAddress, userId = order.UserId, totalPrice = order.totalPrice, stutes = order.stutes };
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 _logger.LogError(ex, "Checkout failed for user ID: {UserId}", _currentUserService.UserId);
 

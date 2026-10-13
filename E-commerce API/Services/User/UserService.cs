@@ -3,6 +3,7 @@ using E_commerce_API.DTOs.Common;
 using E_commerce_API.DTOs.User;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using E_commerce_API.Exception;
 
 namespace E_commerce_API.Services.User
 {
@@ -18,19 +19,6 @@ namespace E_commerce_API.Services.User
             _logger = logger;
         }
 
-        public async Task<bool> AlterActive(int id, bool isActive)
-        {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
-            {
-                return false;
-            }
-            user.IsActive = isActive;   
-            await _context.SaveChangesAsync();
-            _logger.LogInformation($"User with ID {id} has been {(isActive ? "activated" : "deactivated")}.");
-            return true;
-
-        }
 
 
         public async Task<List<UserDto>> GetAllUsers(bool? Active)
@@ -172,7 +160,7 @@ namespace E_commerce_API.Services.User
 
 
 
-        public async Task<UserDto> GetUserById(int Id)
+        public async Task<UserDto?> GetUserById(int Id)
         {
             var result = await _context.Users
                 .Where(u => u.Id == Id)
@@ -185,7 +173,27 @@ namespace E_commerce_API.Services.User
                      IsActive = u.IsActive
                  })
                  .FirstOrDefaultAsync();
+            if(result == null)
+            {
+                throw new NotFoundException("This User is Not Found");
+            }
             return result;
+        }
+
+
+        public async Task<bool> AlterActive(int id, bool isActive)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+
+                throw new NotFoundException("This User is Not Found");
+            }
+            user.IsActive = isActive;   
+            await _context.SaveChangesAsync();
+            _logger.LogInformation($"User with ID {id} has been {(isActive ? "activated" : "deactivated")}.");
+            return true;
+
         }
     }
 }

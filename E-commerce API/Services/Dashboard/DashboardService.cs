@@ -25,6 +25,7 @@ namespace E_commerce_API.Services.Dashboard
             var cancelledOrders = await _context.Order.CountAsync(o => o.stutes == enStutes.Cancelled);
             var totalRevenue = await _context.Order.Where(x=>x.stutes != enStutes.Cancelled).SumAsync(o => o.totalPrice);
             var topSellingProducts = await _context.OrderItems
+                .Where(oi => oi.Order.stutes != enStutes.Cancelled)
                 .GroupBy(oi => new { oi.ProductId, oi.Product.Name })
                 .Select(g => new TopSellingProductDto
                 {

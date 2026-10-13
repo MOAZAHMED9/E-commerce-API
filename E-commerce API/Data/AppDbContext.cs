@@ -2,6 +2,7 @@
 using E_commerce_API.Services.Audit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer;
+using System.Reflection;
 namespace E_commerce_API.Data
 {
     public class AppDbContext : DbContext
@@ -27,9 +28,9 @@ namespace E_commerce_API.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);    //ا EF Core، دور في الـ Assembly بتاع المشروع على كل الـ Classes اللي بتعمل IEntityTypeConfiguration<T>، وطبّق الـ configurations بتاعتها تلقائيًا.
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());    //ا EF Core، دور في الـ Assembly بتاع المشروع على كل الـ Classes اللي بتعمل IEntityTypeConfiguration<T>، وطبّق الـ configurations بتاعتها تلقائيًا.
 
-            SeedData.Seed(modelBuilder);
+            //SeedData.Seed(modelBuilder);
         }
 
 
@@ -43,6 +44,7 @@ namespace E_commerce_API.Data
 
         private void ApplyAuditing()
         {
+
             var statuts = ChangeTracker.Entries<BaseEntity>().ToList();
             foreach (var entry in statuts)
             {

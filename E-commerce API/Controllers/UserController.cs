@@ -1,5 +1,6 @@
 ﻿using E_commerce_API.DTOs.Common;
 using E_commerce_API.DTOs.User;
+using E_commerce_API.Models;
 using E_commerce_API.Services.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -9,7 +10,7 @@ namespace E_commerce_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize(Roles = "Admin")]
+    [Authorize(Roles = Roles.Admin)]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -32,10 +33,7 @@ namespace E_commerce_API.Controllers
         public async Task<ActionResult<UserDto>> GetUserById(int id)
         {
             var user = await _userService.GetUserById(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
+            
             return Ok(user);
         }
 
@@ -44,10 +42,7 @@ namespace E_commerce_API.Controllers
         public async Task<IActionResult> AlterActive(int id,  bool Active = true)
         {
             var result = await _userService.AlterActive(id, Active);
-            if (!result)
-            {
-                return NotFound();
-            }
+           
 
             return NoContent();
         }

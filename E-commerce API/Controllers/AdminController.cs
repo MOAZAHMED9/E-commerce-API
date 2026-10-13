@@ -1,4 +1,5 @@
 ﻿using E_commerce_API.DTOs.Dashboard;
+using E_commerce_API.Models;
 using E_commerce_API.Services.Dashboard;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -8,7 +9,7 @@ namespace E_commerce_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Roles.Admin)]
     public class AdminController : ControllerBase
     {
         private readonly IDashboardService _db;

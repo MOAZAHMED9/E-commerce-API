@@ -8,5 +8,6 @@ namespace E_commerce_API.Services.Auth
         Task<Models.User?> Register(RegisterDTO register);
         Task<Models.User?> Login(LoginDto dto);
         Task<bool> Logout(RefreshDto dto);
+        Task<Models.User?> RefreshToken(RefreshDto dto);
     }
 }
