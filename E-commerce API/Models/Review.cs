@@ -1,18 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace E_commerce_API.Models
 {
     public class Review : BaseEntity
     {
-        [Range(1,10)]
-        public int rate { get; set; }
+        [Range(1, 10)]
+        public int Rating { get; set; }
 
-        public string comment { get; set; }
+        [MaxLength(1000)]
+        public string Comment { get; set; }
 
         public int ProductId { get; set; }
-
         public int UserId { get; set; }
-
         public int OrderId { get; set; }
 
         public Product Product { get; set; }

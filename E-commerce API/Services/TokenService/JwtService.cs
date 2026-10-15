@@ -36,7 +36,7 @@ namespace E_commerce_API.Services.TokenService
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.UserName),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, (user.Role) == enRole.Coustomer? Roles.Customer:Roles.Admin)
+                new Claim(ClaimTypes.Role, (user.Role) == enRole.Customer? Roles.Customer:Roles.Admin)
             };
 
 

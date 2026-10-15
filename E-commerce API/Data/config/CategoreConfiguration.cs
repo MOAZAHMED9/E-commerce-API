@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace E_commerce_API.Data.config
 {
-    public class CategoreConfiguration : IEntityTypeConfiguration<Categore>
+    public class CategoreConfiguration : IEntityTypeConfiguration<Category>
     {
-        public void Configure(EntityTypeBuilder<Categore> builder)
+        public void Configure(EntityTypeBuilder<Category> builder)
         {
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Name).HasMaxLength(20);

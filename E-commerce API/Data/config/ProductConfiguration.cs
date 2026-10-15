@@ -11,9 +11,9 @@ namespace E_commerce_API.Data.config
             builder.Property(x=> x.Price).HasPrecision(18,2);
 
             builder
-                .HasOne(x => x.Categore)
+                .HasOne(x => x.Category)
                 .WithMany(x => x.Products)
-                .HasForeignKey(x => x.CategoreId);
+                .HasForeignKey(x => x.CategoryId);
 
             builder.HasIndex(x => x.Price);
             builder.HasIndex(x => x.IsAvailable);

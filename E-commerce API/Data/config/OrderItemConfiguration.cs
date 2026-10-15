@@ -18,7 +18,7 @@ namespace E_commerce_API.Data.config
                 .WithMany(x => x.OrderItems)
                 .HasForeignKey(x => x.ProductId);
 
-            builder.Property(x => x.priceAtPurchase).HasPrecision(18, 2);
+            builder.Property(x => x.PriceAtPurchase).HasPrecision(18, 2);
             builder.HasQueryFilter(x => !x.IsDeleted);
 
 

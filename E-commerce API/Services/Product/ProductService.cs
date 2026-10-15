@@ -26,16 +26,16 @@ namespace E_commerce_API.Services.Product
                  .Select(x => new ProductDto
                  {
                      Id = x.Id,
-                     Name=x.Name,
-                     Description= x.Description,
-                     price= x.Price,
-                     quantity =x.Stock,
+                     Name = x.Name,
+                     Description = x.Description,
+                     price = x.Price,
+                     quantity = x.Stock,
                      isActive = x.IsAvailable,
-                     Categoryname = x.Categore.Name
-                     
+                     Categoryname = x.Category.Name
+
                  })
                  .ToListAsync();
-
+            
         }
 
 
@@ -59,7 +59,7 @@ namespace E_commerce_API.Services.Product
                       price = x.Price,
                       quantity = x.Stock,
                       isActive = x.IsAvailable,
-                      Categoryname = x.Categore.Name
+                      Categoryname = x.Category.Name
                   })
                   .FirstOrDefaultAsync(x => x.Id == id);
 
@@ -70,14 +70,14 @@ namespace E_commerce_API.Services.Product
 
         public async Task<ProductDto> CreateProduct(CreateProductDto dto)
         {
-            var category = await _context.Categore.AnyAsync(x=> x.Id == dto.CategoryId);
+            var category = await _context.Categorys.AnyAsync(x=> x.Id == dto.CategoryId);
             if (!category)
             {
                 _logger.LogWarning("Category with ID {CategoryId} does not exist.", dto.CategoryId);
                 return null;
             }
 
-            var found = await _context.Products.AnyAsync(x => x.Name == dto.Name && x.CategoreId == dto.CategoryId);
+            var found = await _context.Products.AnyAsync(x => x.Name == dto.Name && x.CategoryId == dto.CategoryId);
 
             if (found)
             {
@@ -91,7 +91,7 @@ namespace E_commerce_API.Services.Product
                 Description = dto.Description,
                 Price=dto.price,
                 Stock = dto.quantity,
-                CategoreId =dto.CategoryId,
+                CategoryId =dto.CategoryId,
                 IsAvailable = dto.isActive,
             };
 
@@ -108,7 +108,7 @@ namespace E_commerce_API.Services.Product
 
         public async Task<bool> UpdateProduct(int id, UpdateProductDto dto)
         {
-            var category = await _context.Categore.AnyAsync(x => x.Id == dto.CategoryId);
+            var category = await _context.Categorys.AnyAsync(x => x.Id == dto.CategoryId);
 
             if (!category)
             {
@@ -129,7 +129,7 @@ namespace E_commerce_API.Services.Product
             found.Description = dto.Description;
             found.Price = dto.price;
             found.Stock = dto.quantity;
-            found.CategoreId = dto.CategoryId;
+            found.CategoryId = dto.CategoryId;
             found.IsAvailable = dto.isActive;
 
 
@@ -274,7 +274,7 @@ namespace E_commerce_API.Services.Product
                     Description = s.Description,
                     quantity= s.Stock,
                     isActive= s.IsAvailable,
-                    Categoryname = s.Categore.Name
+                    Categoryname = s.Category.Name
 
                 })
                 .ToListAsync();

@@ -1,9 +1,9 @@
-﻿using E_commerce_API.Data;
+using E_commerce_API.Data;
 using E_commerce_API.DTOs.Review;
 using E_commerce_API.Models;
 using E_commerce_API.Services.Audit;
-using Microsoft.EntityFrameworkCore;
 using E_commerce_API.Exception;
+using Microsoft.EntityFrameworkCore;
 
 namespace E_commerce_API.Services.Review
 {
@@ -11,7 +11,7 @@ namespace E_commerce_API.Services.Review
     {
         private readonly AppDbContext _context;
         private readonly ICurrentUserService _currentUserService;
-        private readonly ILogger<ReviewService> _logger;    
+        private readonly ILogger<ReviewService> _logger;
 
         public ReviewService(AppDbContext context, ICurrentUserService currentUserService, ILogger<ReviewService> logger)
         {
@@ -22,13 +22,12 @@ namespace E_commerce_API.Services.Review
 
         public async Task<List<ReviewDto>> GetAllReviews()
         {
-
             var result = await _context.Reviews
                 .Select(r => new ReviewDto
                 {
                     Id = r.Id,
-                    Rate = r.rate,
-                    Comment = r.comment,
+                    Rate = r.Rating,
+                    Comment = r.Comment,
                     UserName = r.User.UserName,
                     CreatedAt = r.CreateAt,
                 })
@@ -36,7 +35,6 @@ namespace E_commerce_API.Services.Review
 
             return result;
         }
-
 
         public async Task<List<ReviewDto>> GetReviewsByProductId(int productId)
         {
@@ -45,8 +43,8 @@ namespace E_commerce_API.Services.Review
                 .Select(r => new ReviewDto
                 {
                     Id = r.Id,
-                    Rate = r.rate,
-                    Comment = r.comment,
+                    Rate = r.Rating,
+                    Comment = r.Comment,
                     UserName = r.User.UserName,
                     CreatedAt = r.CreateAt,
                 })
@@ -54,63 +52,54 @@ namespace E_commerce_API.Services.Review
                 .ToListAsync();
 
             return result;
-
         }
 
-         public async Task<ReviewDto> GetReviewById(int reviewId)
-         {
-            
+        public async Task<ReviewDto> GetReviewById(int reviewId)
+        {
             var result = await _context.Reviews
                 .Where(r => r.Id == reviewId)
                 .Select(r => new ReviewDto
                 {
                     Id = r.Id,
-                    Rate = r.rate,
-                    Comment = r.comment,
+                    Rate = r.Rating,
+                    Comment = r.Comment,
                     UserName = r.User.UserName,
                     CreatedAt = r.CreateAt,
                 })
                 .FirstOrDefaultAsync();
             return result;
-
         }
-
-
 
         public async Task<ReviewDto> CreateReview(CreateReview reviewDto)
         {
-
-
             var order = await _context.Order
                 .Include(o => o.OrderItems)
-                .FirstOrDefaultAsync(o => o.Id == reviewDto.orderId && o.UserId == _currentUserService.UserId && o.stutes==enStutes.Delivered && o.OrderItems.Any(x => x.ProductId == reviewDto.ProductId));
-
+                .FirstOrDefaultAsync(o => o.Id == reviewDto.orderId 
+                    && o.UserId == _currentUserService.UserId 
+                    && o.Status == OrderStatus.Delivered 
+                    && o.OrderItems.Any(x => x.ProductId == reviewDto.ProductId));
 
             if (order == null)
             {
                 throw new BadRequestException("You can only review a product from a delivered order.");
             }
 
-            
-
             var existingReview = await _context.Reviews
-                .AnyAsync(r => r.ProductId == reviewDto.ProductId &&
-                r.UserId == _currentUserService.UserId &&
-                r.OrderId == reviewDto.orderId);
-
+                .AnyAsync(r => r.ProductId == reviewDto.ProductId
+                    && r.UserId == _currentUserService.UserId
+                    && r.OrderId == reviewDto.orderId);
 
             if (existingReview)
             {
-                throw new BadRequestException("you already reviewed this product");
+                throw new BadRequestException("You already reviewed this product.");
             }
-
 
             var review = new Models.Review
             {
                 ProductId = reviewDto.ProductId,
                 UserId = _currentUserService.UserId.Value,
-                rate = reviewDto.rate,
-                comment = reviewDto.comment,
+                Rating = reviewDto.rate,
+                Comment = reviewDto.comment,
                 OrderId = reviewDto.orderId
             };
 
@@ -121,18 +110,18 @@ namespace E_commerce_API.Services.Review
             return await GetReviewById(review.Id);
         }
 
-
-
         public async Task<bool> UpdateReview(int reviewId, UpdateReviewDto reviewDto)
         {
-            var review = await _context.Reviews.FirstOrDefaultAsync(x => x.Id == reviewId && x.UserId == _currentUserService.UserId);
+            var review = await _context.Reviews
+                .FirstOrDefaultAsync(x => x.Id == reviewId && x.UserId == _currentUserService.UserId);
+            
             if (review == null)
             {
-                return false;
+                throw new NotFoundException("Review not found or you do not have permission to update it.");
             }
 
-            review.rate = reviewDto.rate;
-            review.comment = reviewDto.comment;
+            review.Rating = reviewDto.rate;
+            review.Comment = reviewDto.comment;
             await _context.SaveChangesAsync();
             _logger.LogInformation("Review updated with ID: {ReviewId} by User: {UserId}", review.Id, _currentUserService.UserId);
             return true;
@@ -141,12 +130,15 @@ namespace E_commerce_API.Services.Review
         public async Task<bool> DeleteReview(int reviewId)
         {
             var userId = _currentUserService.UserId;
-            var review = await _context.Reviews.FirstOrDefaultAsync(x=> x.Id==reviewId && x.UserId==userId);
+            var review = await _context.Reviews
+                .FirstOrDefaultAsync(x => x.Id == reviewId && x.UserId == userId);
+            
             if (review == null)
             {
                 _logger.LogWarning("Attempt to delete review with ID: {ReviewId} by User: {UserId} failed - review not found or user not authorized", reviewId, userId);
-                return false;
+                throw new NotFoundException("Review not found or you do not have permission to delete it.");
             }
+            
             _context.Reviews.Remove(review);
             await _context.SaveChangesAsync();
             _logger.LogInformation("Review deleted with ID: {ReviewId} by User: {UserId}", review.Id, _currentUserService.UserId);

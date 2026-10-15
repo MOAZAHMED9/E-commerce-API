@@ -20,12 +20,12 @@ namespace E_commerce_API.Services.Dashboard
             var totalUsers = await _context.Users.CountAsync();
             var totalOrders = await _context.Order.CountAsync();
             var totalProducts = await _context.Products.CountAsync();
-            var pendingOrders = await _context.Order.CountAsync(o => o.stutes == enStutes.Pending);
-            var deliveredOrders = await _context.Order.CountAsync(o => o.stutes == enStutes.Delivered);
-            var cancelledOrders = await _context.Order.CountAsync(o => o.stutes == enStutes.Cancelled);
-            var totalRevenue = await _context.Order.Where(x=>x.stutes != enStutes.Cancelled).SumAsync(o => o.totalPrice);
+            var pendingOrders = await _context.Order.CountAsync(o => o.Status == OrderStatus.Pending);
+            var deliveredOrders = await _context.Order.CountAsync(o => o.Status == OrderStatus.Delivered);
+            var cancelledOrders = await _context.Order.CountAsync(o => o.Status == OrderStatus.Cancelled);
+            var totalRevenue = await _context.Order.Where(x=>x.Status != OrderStatus.Cancelled).SumAsync(o => o.TotalPrice);
             var topSellingProducts = await _context.OrderItems
-                .Where(oi => oi.Order.stutes != enStutes.Cancelled)
+                .Where(oi => oi.Order.Status != OrderStatus.Cancelled)
                 .GroupBy(oi => new { oi.ProductId, oi.Product.Name })
                 .Select(g => new TopSellingProductDto
                 {

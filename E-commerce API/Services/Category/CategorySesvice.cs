@@ -19,7 +19,7 @@ namespace E_commerce_API.Services.Category
 
         public async Task<List<CategoryDto>> GetAllCategories()
         {
-            var categorias = await _context.Categore
+            var categorias = await _context.Categorys
                 .AsNoTracking()
                 .Select(s=> new CategoryDto
                 {
@@ -42,7 +42,7 @@ namespace E_commerce_API.Services.Category
                 return null;
             }
             
-            var caregory = await _context.Categore
+            var caregory = await _context.Categorys
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x=> x.Id == id);
 
@@ -65,21 +65,21 @@ namespace E_commerce_API.Services.Category
         
         public async Task<CategoryDto> CreateCategory(CreateCategoryDto dto)
         {
-            var found = await _context.Categore.AnyAsync(x=> x.Name == dto.Name);
+            var found = await _context.Categorys.AnyAsync(x=> x.Name == dto.Name);
 
             if(found)
             {
                 return null;
             }
 
-            var category = new Models.Categore
+            var category = new Models.Category
             {
                 Name = dto.Name,
                 Description = dto.Description,
 
             };
 
-            await _context.Categore.AddAsync(category);
+            await _context.Categorys.AddAsync(category);
             await _context.SaveChangesAsync();
             _logger.LogInformation($"Category created with ID: {category.Id} ");
 
@@ -95,7 +95,7 @@ namespace E_commerce_API.Services.Category
                 return false;
             }
 
-            var category = await _context.Categore.FirstOrDefaultAsync(x => x.Id == id);
+            var category = await _context.Categorys.FirstOrDefaultAsync(x => x.Id == id);
             if (category == null)
             {
                 return false;
@@ -120,7 +120,7 @@ namespace E_commerce_API.Services.Category
                 return false;
             }
 
-            var category = await _context.Categore
+            var category = await _context.Categorys
                 .Include(x=> x.Products)
                 .FirstOrDefaultAsync(x => x.Id == id);
 

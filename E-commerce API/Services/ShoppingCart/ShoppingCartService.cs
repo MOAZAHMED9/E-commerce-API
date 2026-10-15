@@ -36,7 +36,7 @@ namespace E_commerce_API.Services.ShoppingCart
                     {
                         productId = i.ProductId,
                         productName = i.Product.Name,
-                        Quantity = i.quantity
+                        Quantity = i.Quantity
                     })
                 .ToList()
                })
@@ -87,12 +87,12 @@ namespace E_commerce_API.Services.ShoppingCart
 
             if (foundProductinitem != null)
             {
-                if (foundProductinitem.quantity + quantity > product.Stock)
+                if (foundProductinitem.Quantity + quantity > product.Stock)
                 {
                     throw new BadRequestException("Adding this quantity exceeds available stock.");
                 }
 
-                foundProductinitem.quantity += quantity;
+                foundProductinitem.Quantity += quantity;
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation($"Product with ID: {product.Id} quantity updated in cart for user ID: {userid}");
@@ -106,7 +106,7 @@ namespace E_commerce_API.Services.ShoppingCart
             var cartitem = new CartItem
             {
                 ProductId = product.Id,
-                quantity = quantity,
+                Quantity = quantity,
                 ShoppingCartId = shopcart
             };
 
@@ -157,7 +157,7 @@ namespace E_commerce_API.Services.ShoppingCart
                 throw new NotFoundException("Product not found in cart.");
             }
 
-            foundProductinitem.quantity = quantity;
+            foundProductinitem.Quantity = quantity;
             await _context.SaveChangesAsync();
             _logger.LogInformation($"Product with ID: {product.Id} quantity updated to {quantity} in cart for user ID: {userid}");
 
@@ -268,9 +268,9 @@ namespace E_commerce_API.Services.ShoppingCart
                         throw new BadRequestException($"Product with ID {item.ProductId} is not available.");
                     }
 
-                    if (item.quantity > item.Product.Stock)
+                    if (item.Quantity > item.Product.Stock)
                     {
-                        throw new BadRequestException($"Not enough stock for product {item.ProductId}. Requested: {item.quantity}, Available: {item.Product.Stock}.");
+                        throw new BadRequestException($"Not enough stock for product {item.ProductId}. Requested: {item.Quantity}, Available: {item.Product.Stock}.");
                     }
                 }
 
@@ -281,15 +281,15 @@ namespace E_commerce_API.Services.ShoppingCart
                 var totalprice = 0m;
                 foreach (var item in result)
                 {
-                    totalprice += item.Product.Price * item.quantity;
+                    totalprice += item.Product.Price * item.Quantity;
                 }
 
 
                 var order = new Models.Order
                 {
-                    totalPrice = totalprice,
-                    stutes = enStutes.Pending,
-                    shippingAddress = address,
+                    TotalPrice = totalprice,
+                    Status = OrderStatus.Pending,
+                    ShippingAddress = address,
                     UserId = userid
 
                 };
@@ -299,8 +299,8 @@ namespace E_commerce_API.Services.ShoppingCart
                 {
                     var orderitem = new OrderItem
                     {
-                        Quantity = item.quantity,
-                        priceAtPurchase = item.Product.Price,
+                        Quantity = item.Quantity,
+                        PriceAtPurchase = item.Product.Price,
                         ProductId = item.ProductId,
                         Order = order,                                 ////// 
 
@@ -313,9 +313,9 @@ namespace E_commerce_API.Services.ShoppingCart
                 {
                     
                     var affected = await _context.Products
-                    .Where(p => p.Id == item.ProductId && p.IsAvailable && p.Stock >= item.quantity)
+                    .Where(p => p.Id == item.ProductId && p.IsAvailable && p.Stock >= item.Quantity)
 
-                    .ExecuteUpdateAsync(s => s.SetProperty(p => p.Stock, p => p.Stock - item.quantity)); ///////////????
+                    .ExecuteUpdateAsync(s => s.SetProperty(p => p.Stock, p => p.Stock - item.Quantity)); ///////////????
 
                     if (affected == 0)
                     {
@@ -331,7 +331,7 @@ namespace E_commerce_API.Services.ShoppingCart
               
                 _logger.LogInformation($"Checkout completed for user ID: {userid}, Order ID: {order.Id}, Total Price: {totalprice}");
                 
-                return new OrderDto { Id = order.Id, Address = order.shippingAddress, userId = order.UserId, totalPrice = order.totalPrice, stutes = order.stutes };
+                return new OrderDto { Id = order.Id, Address = order.ShippingAddress, userId = order.UserId, totalPrice = order.TotalPrice, stutes = order.Status };
             }
             catch (System.Exception ex)
             {

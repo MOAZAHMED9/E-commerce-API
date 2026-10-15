@@ -43,6 +43,9 @@ namespace E_commerce_API.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
                     b.Property<int>("ShoppingCartId")
                         .HasColumnType("int");
 
@@ -52,51 +55,17 @@ namespace E_commerce_API.Migrations
                     b.Property<string>("UpdateBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("quantity")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
 
                     b.HasIndex("ShoppingCartId");
 
-                    b.ToTable("CartItems");
+                    b.HasIndex("ProductId", "ShoppingCartId")
+                        .IsUnique();
 
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreateAt = new DateTime(2026, 9, 25, 15, 5, 42, 734, DateTimeKind.Utc).AddTicks(8165),
-                            CreateBy = "System",
-                            IsDeleted = false,
-                            ProductId = 1,
-                            ShoppingCartId = 1,
-                            quantity = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreateAt = new DateTime(2026, 9, 25, 15, 5, 42, 734, DateTimeKind.Utc).AddTicks(8165),
-                            CreateBy = "System",
-                            IsDeleted = false,
-                            ProductId = 3,
-                            ShoppingCartId = 1,
-                            quantity = 2
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CreateAt = new DateTime(2026, 9, 25, 15, 5, 42, 734, DateTimeKind.Utc).AddTicks(8165),
-                            CreateBy = "System",
-                            IsDeleted = false,
-                            ProductId = 4,
-                            ShoppingCartId = 2,
-                            quantity = 3
-                        });
+                    b.ToTable("CartItems");
                 });
 
-            modelBuilder.Entity("E_commerce_API.Models.Categore", b =>
+            modelBuilder.Entity("E_commerce_API.Models.Category", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -132,36 +101,7 @@ namespace E_commerce_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categore");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreateAt = new DateTime(2026, 9, 25, 15, 5, 42, 734, DateTimeKind.Utc).AddTicks(8165),
-                            CreateBy = "System",
-                            Description = "Electronic devices and accessories",
-                            IsDeleted = false,
-                            Name = "Electronics"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreateAt = new DateTime(2026, 9, 25, 15, 5, 42, 734, DateTimeKind.Utc).AddTicks(8165),
-                            CreateBy = "System",
-                            Description = "Men and women clothes",
-                            IsDeleted = false,
-                            Name = "Clothes"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CreateAt = new DateTime(2026, 9, 25, 15, 5, 42, 734, DateTimeKind.Utc).AddTicks(8165),
-                            CreateBy = "System",
-                            Description = "Home and kitchen appliances",
-                            IsDeleted = false,
-                            Name = "Home Appliances"
-                        });
+                    b.ToTable("Categorys");
                 });
 
             modelBuilder.Entity("E_commerce_API.Models.Order", b =>
@@ -182,6 +122,17 @@ namespace E_commerce_API.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<string>("ShippingAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<DateTime?>("UpdateAt")
                         .HasColumnType("datetime2");
 
@@ -191,46 +142,11 @@ namespace E_commerce_API.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.Property<string>("shippingAddress")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("stutes")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("totalPrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
 
                     b.ToTable("Order");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreateAt = new DateTime(2026, 9, 25, 15, 5, 42, 734, DateTimeKind.Utc).AddTicks(8165),
-                            CreateBy = "System",
-                            IsDeleted = false,
-                            UserId = 2,
-                            shippingAddress = "Cairo, Egypt",
-                            stutes = 3,
-                            totalPrice = 50000m
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreateAt = new DateTime(2026, 9, 25, 15, 5, 42, 734, DateTimeKind.Utc).AddTicks(8165),
-                            CreateBy = "System",
-                            IsDeleted = false,
-                            UserId = 3,
-                            shippingAddress = "Giza, Egypt",
-                            stutes = 1,
-                            totalPrice = 1800m
-                        });
                 });
 
             modelBuilder.Entity("E_commerce_API.Models.OrderItem", b =>
@@ -254,6 +170,10 @@ namespace E_commerce_API.Migrations
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("PriceAtPurchase")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
@@ -266,10 +186,6 @@ namespace E_commerce_API.Migrations
                     b.Property<string>("UpdateBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("priceAtPurchase")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
@@ -277,41 +193,6 @@ namespace E_commerce_API.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("OrderItems");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreateAt = new DateTime(2026, 9, 25, 15, 5, 42, 734, DateTimeKind.Utc).AddTicks(8165),
-                            CreateBy = "System",
-                            IsDeleted = false,
-                            OrderId = 1,
-                            ProductId = 1,
-                            Quantity = 1,
-                            priceAtPurchase = 45000m
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreateAt = new DateTime(2026, 9, 25, 15, 5, 42, 734, DateTimeKind.Utc).AddTicks(8165),
-                            CreateBy = "System",
-                            IsDeleted = false,
-                            OrderId = 1,
-                            ProductId = 3,
-                            Quantity = 2,
-                            priceAtPurchase = 2500m
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CreateAt = new DateTime(2026, 9, 25, 15, 5, 42, 734, DateTimeKind.Utc).AddTicks(8165),
-                            CreateBy = "System",
-                            IsDeleted = false,
-                            OrderId = 2,
-                            ProductId = 4,
-                            Quantity = 3,
-                            priceAtPurchase = 600m
-                        });
                 });
 
             modelBuilder.Entity("E_commerce_API.Models.Product", b =>
@@ -322,7 +203,7 @@ namespace E_commerce_API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CategoreId")
+                    b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreateAt")
@@ -334,7 +215,8 @@ namespace E_commerce_API.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("bit");
@@ -344,7 +226,8 @@ namespace E_commerce_API.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<decimal>("Price")
                         .HasPrecision(18, 2)
@@ -361,80 +244,13 @@ namespace E_commerce_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoreId");
+                    b.HasIndex("CategoryId");
 
                     b.HasIndex("IsAvailable");
 
                     b.HasIndex("Price");
 
                     b.ToTable("Products");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CategoreId = 1,
-                            CreateAt = new DateTime(2026, 9, 25, 15, 5, 42, 734, DateTimeKind.Utc).AddTicks(8165),
-                            CreateBy = "System",
-                            Description = "Apple iPhone 15 128GB",
-                            IsAvailable = true,
-                            IsDeleted = false,
-                            Name = "iPhone 15",
-                            Price = 45000m,
-                            Stock = 10
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CategoreId = 1,
-                            CreateAt = new DateTime(2026, 9, 25, 15, 5, 42, 734, DateTimeKind.Utc).AddTicks(8165),
-                            CreateBy = "System",
-                            Description = "Samsung Galaxy S24 256GB",
-                            IsAvailable = true,
-                            IsDeleted = false,
-                            Name = "Samsung Galaxy S24",
-                            Price = 35000m,
-                            Stock = 15
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CategoreId = 1,
-                            CreateAt = new DateTime(2026, 9, 25, 15, 5, 42, 734, DateTimeKind.Utc).AddTicks(8165),
-                            CreateBy = "System",
-                            Description = "Bluetooth wireless headphones",
-                            IsAvailable = true,
-                            IsDeleted = false,
-                            Name = "Wireless Headphones",
-                            Price = 2500m,
-                            Stock = 30
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CategoreId = 2,
-                            CreateAt = new DateTime(2026, 9, 25, 15, 5, 42, 734, DateTimeKind.Utc).AddTicks(8165),
-                            CreateBy = "System",
-                            Description = "Cotton T-Shirt",
-                            IsAvailable = true,
-                            IsDeleted = false,
-                            Name = "T-Shirt",
-                            Price = 600m,
-                            Stock = 50
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CategoreId = 3,
-                            CreateAt = new DateTime(2026, 9, 25, 15, 5, 42, 734, DateTimeKind.Utc).AddTicks(8165),
-                            CreateBy = "System",
-                            Description = "Automatic coffee machine",
-                            IsAvailable = true,
-                            IsDeleted = false,
-                            Name = "Coffee Machine",
-                            Price = 5000m,
-                            Stock = 8
-                        });
                 });
 
             modelBuilder.Entity("E_commerce_API.Models.Review", b =>
@@ -444,6 +260,11 @@ namespace E_commerce_API.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<DateTime>("CreateAt")
                         .HasColumnType("datetime2");
@@ -461,6 +282,9 @@ namespace E_commerce_API.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdateAt")
                         .HasColumnType("datetime2");
 
@@ -470,49 +294,16 @@ namespace E_commerce_API.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.Property<string>("comment")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("rate")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
 
                     b.HasIndex("ProductId");
 
-                    b.HasIndex("UserId", "ProductId")
+                    b.HasIndex("UserId", "ProductId", "OrderId")
                         .IsUnique();
 
                     b.ToTable("Reviews");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreateAt = new DateTime(2026, 9, 25, 15, 5, 42, 734, DateTimeKind.Utc).AddTicks(8165),
-                            CreateBy = "System",
-                            IsDeleted = false,
-                            OrderId = 1,
-                            ProductId = 1,
-                            UserId = 2,
-                            comment = "Excellent product and very good quality.",
-                            rate = 9
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreateAt = new DateTime(2026, 9, 25, 15, 5, 42, 734, DateTimeKind.Utc).AddTicks(8165),
-                            CreateBy = "System",
-                            IsDeleted = false,
-                            OrderId = 2,
-                            ProductId = 4,
-                            UserId = 3,
-                            comment = "Good quality and comfortable.",
-                            rate = 8
-                        });
                 });
 
             modelBuilder.Entity("E_commerce_API.Models.ShoppingCart", b =>
@@ -548,24 +339,6 @@ namespace E_commerce_API.Migrations
                         .IsUnique();
 
                     b.ToTable("ShoppingCarts");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreateAt = new DateTime(2026, 9, 25, 15, 5, 42, 734, DateTimeKind.Utc).AddTicks(8165),
-                            CreateBy = "System",
-                            IsDeleted = false,
-                            UserId = 2
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreateAt = new DateTime(2026, 9, 25, 15, 5, 42, 734, DateTimeKind.Utc).AddTicks(8165),
-                            CreateBy = "System",
-                            IsDeleted = false,
-                            UserId = 3
-                        });
                 });
 
             modelBuilder.Entity("E_commerce_API.Models.User", b =>
@@ -585,7 +358,8 @@ namespace E_commerce_API.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -593,15 +367,15 @@ namespace E_commerce_API.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Password")
+                    b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Phone")
                         .IsRequired()
-                        .HasMaxLength(11)
-                        .HasColumnType("nvarchar(11)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<DateTime?>("RefreshTokenExpiresAt")
                         .HasColumnType("datetime2");
@@ -623,8 +397,8 @@ namespace E_commerce_API.Migrations
 
                     b.Property<string>("UserName")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
@@ -632,47 +406,6 @@ namespace E_commerce_API.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreateAt = new DateTime(2026, 9, 25, 15, 5, 42, 734, DateTimeKind.Utc).AddTicks(8165),
-                            CreateBy = "System",
-                            Email = "admin@example.com",
-                            IsActive = true,
-                            IsDeleted = false,
-                            Password = "$2a$11$j8PnFPfkEgzxZRnIKxt9I.KEeRpDDC8gkwWN.ne1yg62eRBZMlBJG",
-                            Phone = "01012345678",
-                            Role = 2,
-                            UserName = "Admin"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreateAt = new DateTime(2026, 9, 25, 15, 5, 42, 734, DateTimeKind.Utc).AddTicks(8165),
-                            CreateBy = "System",
-                            Email = "moaz@example.com",
-                            IsActive = true,
-                            IsDeleted = false,
-                            Password = "$2a$11$AK9n1QKCfpcZcsm8eog7UOWNMjH1dBQiWVST5LEkr197q0tbwaCga",
-                            Phone = "01112345678",
-                            Role = 1,
-                            UserName = "MoazAhmed"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CreateAt = new DateTime(2026, 9, 25, 15, 5, 42, 734, DateTimeKind.Utc).AddTicks(8165),
-                            CreateBy = "System",
-                            Email = "ahmed@example.com",
-                            IsActive = true,
-                            IsDeleted = false,
-                            Password = "$2a$11$SSjPkOkWdESUekbbO0s7EesXaSUF8ChGrkGzwCWkTxyeWkVa533qW",
-                            Phone = "01212345678",
-                            Role = 1,
-                            UserName = "AhmedAli"
-                        });
                 });
 
             modelBuilder.Entity("E_commerce_API.Models.CartItem", b =>
@@ -726,13 +459,13 @@ namespace E_commerce_API.Migrations
 
             modelBuilder.Entity("E_commerce_API.Models.Product", b =>
                 {
-                    b.HasOne("E_commerce_API.Models.Categore", "Categore")
+                    b.HasOne("E_commerce_API.Models.Category", "Category")
                         .WithMany("Products")
-                        .HasForeignKey("CategoreId")
+                        .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Categore");
+                    b.Navigation("Category");
                 });
 
             modelBuilder.Entity("E_commerce_API.Models.Review", b =>
@@ -773,7 +506,7 @@ namespace E_commerce_API.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("E_commerce_API.Models.Categore", b =>
+            modelBuilder.Entity("E_commerce_API.Models.Category", b =>
                 {
                     b.Navigation("Products");
                 });

@@ -28,7 +28,7 @@ namespace E_commerce_API.Data.config
 
             builder.HasIndex(x => new { x.UserId, x.ProductId , x.OrderId}).IsUnique();
 
-            builder.Property(x => x.rate);
+            builder.Property(x => x.Rating);
 
             builder.HasQueryFilter(x => !x.IsDeleted);
 

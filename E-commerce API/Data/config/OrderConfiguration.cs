@@ -13,7 +13,7 @@ namespace E_commerce_API.Data.config
                 .WithMany(x => x.Orders)
                 .HasForeignKey(x => x.UserId);
 
-            builder.Property(x=> x.totalPrice).HasPrecision(18,2);
+            builder.Property(x=> x.TotalPrice).HasPrecision(18,2);
             builder.HasQueryFilter(x => !x.IsDeleted);
 
         }

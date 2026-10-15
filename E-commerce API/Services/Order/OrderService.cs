@@ -28,9 +28,9 @@ namespace E_commerce_API.Services.Order
                 {
                     Id = o.Id,
                     userId = o.UserId,
-                    totalPrice = o.totalPrice,
-                    stutes = o.stutes,
-                    Address = o.shippingAddress
+                    totalPrice = o.TotalPrice,
+                    stutes = o.Status,
+                    Address = o.ShippingAddress
                 })
                 .ToListAsync();
 
@@ -46,8 +46,8 @@ namespace E_commerce_API.Services.Order
                 .Select(o => new MyOrderDto
                 {
                     Id = o.Id,
-                    Address = o.shippingAddress,
-                    stutes = o.stutes
+                    Address = o.ShippingAddress,
+                    stutes = o.Status
                 })
                 .ToListAsync();
 
@@ -63,8 +63,8 @@ namespace E_commerce_API.Services.Order
                 .Select(o => new MyOrderDto
                 {
                     Id = o.Id,
-                    Address = o.shippingAddress,
-                    stutes = o.stutes
+                    Address = o.ShippingAddress,
+                    stutes = o.Status
                 })
                 .FirstOrDefaultAsync();
             return result;
@@ -78,23 +78,23 @@ namespace E_commerce_API.Services.Order
                 .Select(o => new OrderDetails
                 {
                     Id = o.Id,
-                    Address = o.shippingAddress,
+                    Address = o.ShippingAddress,
                     userId = o.UserId,
-                    stutes = o.stutes,
+                    stutes = o.Status,
                     OrderItems = o.OrderItems
                     .Select(oi => new OrderItem
                     {
                         ProductId = oi.ProductId,
                         quantity = oi.Quantity,
-                        price = oi.priceAtPurchase
+                        price = oi.PriceAtPurchase
                     })
                     .ToList(),
 
                     Reviews = o.Reviews
                     .Select(r => new DTOs.Order.Review
                     {
-                        rate = r.rate,
-                        comment = r.comment
+                        rate = r.Rating,
+                        comment = r.Comment
                     }).ToList()
                 })
                 .ToListAsync();
@@ -115,31 +115,31 @@ namespace E_commerce_API.Services.Order
                 return false;
             }
 
-            switch (order.stutes)
+            switch (order.Status)
             {
-                case enStutes.Pending:
-                    order.stutes = enStutes.Processing;
+                case OrderStatus.Pending:
+                    order.Status = OrderStatus.Processing;
                     break;
 
-                case enStutes.Processing:
-                    order.stutes = enStutes.Shipped;
+                case OrderStatus.Processing:
+                    order.Status = OrderStatus.Shipped;
                     break;
 
-                case enStutes.Shipped:
-                    order.stutes = enStutes.Delivered;
+                case OrderStatus.Shipped:
+                    order.Status = OrderStatus.Delivered;
                     break;
 
-                case enStutes.Delivered:
+                case OrderStatus.Delivered:
                     return false;
 
-                case enStutes.Cancelled:
+                case OrderStatus.Cancelled:
                     return false;
 
                 default:
                     return false;
             }
             await _context.SaveChangesAsync();
-            _logger.LogInformation($"Order with ID {OrderId} status updated to {order.stutes}. userid : {_currentUserService.UserId}");
+            _logger.LogInformation($"Order with ID {OrderId} status updated to {order.Status}. userid : {_currentUserService.UserId}");
             return true;
         }
 
@@ -156,7 +156,7 @@ namespace E_commerce_API.Services.Order
                 _logger.LogWarning($"Order with ID {OrderId} not found or does not belong to the current user. userid : {_currentUserService.UserId}");
                 return false;
             }
-            if (order.stutes != enStutes.Processing && order.stutes != enStutes.Pending)
+            if (order.Status != OrderStatus.Processing && order.Status != OrderStatus.Pending)
             {
                 return false;
             }
@@ -166,7 +166,7 @@ namespace E_commerce_API.Services.Order
                 item.Product.Stock += item.Quantity;
             }
 
-            order.stutes = enStutes.Cancelled;
+            order.Status = OrderStatus.Cancelled;
             await _context.SaveChangesAsync();
             _logger.LogInformation($"Order with ID {OrderId} has been cancelled. userid : {_currentUserService.UserId}");
             return true;

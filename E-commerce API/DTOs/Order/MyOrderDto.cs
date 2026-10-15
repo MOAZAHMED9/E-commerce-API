@@ -6,6 +6,6 @@ namespace E_commerce_API.DTOs.Order
     {
         public int Id { get; set; }
         public string Address { get; set; }
-        public enStutes stutes { get; set; }
+        public OrderStatus stutes { get; set; }
     }
 }
